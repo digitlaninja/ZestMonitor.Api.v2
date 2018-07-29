@@ -44,6 +44,15 @@ namespace ZestMonitor.Api
             services.AddDbContext<ZestContext>(x => x.UseMySql(Configuration["ConnectionStrings:Default"]));
             services.AddTransient<Seed>();
             services.AddMvc().AddFluentValidation();
+            services.AddCors(options =>
+            {
+                options.AddPolicy("AllowAll",
+                        p => p.AllowAnyOrigin()
+                                .AllowAnyHeader()
+                                .AllowAnyMethod()
+                                .AllowCredentials());
+            });
+            
             services.AddSingleton<IValidator<ProposalPaymentsModel>, ProposalPaymentsValidator>();
             services.AddTransient<ProposalPaymentsService>();
             services.AddTransient<IProposalPaymentsRepository, ProposalPaymentsRepository>();
@@ -59,7 +68,6 @@ namespace ZestMonitor.Api
             loggerFactory.AddConsole();
             this._logger = loggerFactory.CreateLogger<ConsoleLogger>();
 
-
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -72,6 +80,7 @@ namespace ZestMonitor.Api
                 // app.UseHsts();
             }
 
+            app.UseCors("AllowAll");
             app.UseExceptionHandler("/error").WithConventions(x =>
             {
                 x.ContentType = "application/json";
