@@ -12,13 +12,13 @@ namespace ZestMonitor.Api.Repositories
     {
         public ProposalPaymentsRepository(ZestContext context) : base(context) { }
 
-        public async Task<IEnumerable<ProposalPayments>> GetPaged(int pageIndex, int pageSize)
+        public async Task<IEnumerable<ProposalPayments>> GetPaged(int page, int limit)
         {
             var entities = await this.GetAll();
             if (entities.Count() <= 0 || entities == null)
                 return new List<ProposalPayments>();
 
-            return entities.Skip((pageIndex - 1) * 10).Take(pageSize).ToList();
+            return entities.Skip((page - 1) * 10).Take(limit).ToList();
         }
     }
 }

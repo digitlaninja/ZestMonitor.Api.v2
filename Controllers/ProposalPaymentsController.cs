@@ -22,9 +22,9 @@ namespace ZestMonitor.Api.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetProposals()
+        public async Task<IActionResult> GetProposals(int page = 1, int limit = 10)
         {
-            var proposals = await this.ProposalPaymentsService.GetProposals();
+            var proposals = await this.ProposalPaymentsService.GetPaged(page, limit);
             if (proposals == null)
                 return NotFound(new { Error = "Proposals found" });
 

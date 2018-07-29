@@ -19,9 +19,15 @@ namespace ZestMonitor.Api.Services
             this.ProposalPaymentsRepository = proposalPaymentsRepository;
         }
 
-        public async Task<IEnumerable<ProposalPaymentsModel>> GetProposals()
+        public async Task<IEnumerable<ProposalPaymentsModel>> GetAll()
         {
             var proposals = await this.ProposalPaymentsRepository.GetAll();
+            return proposals.ToModel();
+        }
+
+        public async Task<IEnumerable<ProposalPaymentsModel>> GetPaged(int page = 1, int limit = 10)
+        {
+            var proposals = await this.ProposalPaymentsRepository.GetPaged(page, limit);
             return proposals.ToModel();
         }
 
