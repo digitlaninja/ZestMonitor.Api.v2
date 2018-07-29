@@ -5,7 +5,6 @@ using System;
 
 public static class ProposalPaymentsFactory
 {
-
     public static ProposalPaymentsModel ToModel(this ProposalPayments entity)
     {
         if (entity == null)
