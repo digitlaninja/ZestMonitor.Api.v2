@@ -38,20 +38,8 @@ namespace ZestMonitor.Api.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            try
-            {
-                this.ProposalPaymentsService.Create(model);
-                return Ok(model);
-            }
-            catch (DbUpdateException)
-            {
-                return BadRequest();
-            }
-            catch (ArgumentNullException)
-            {
-                return BadRequest();
-            }
-
+            await this.ProposalPaymentsService.Create(model);
+            return Ok(model);
         }
 
     }

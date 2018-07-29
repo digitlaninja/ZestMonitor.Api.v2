@@ -25,14 +25,14 @@ namespace ZestMonitor.Api.Services
             return proposals.ToModel();
         }
 
-        public async void Create(ProposalPaymentsModel model)
+        public async Task Create(ProposalPaymentsModel model)
         {
-            throw new DbUpdateException("could not update", new ArgumentException());
-            // if (model == null)
-            //     throw new ArgumentNullException(nameof(model));
+            if (model == null)
+                throw new ArgumentNullException(nameof(model));
 
-            // var entity = model.ToEntity();
-            // this.ProposalPaymentsRepository.Add(entity);
+            var entity = model.ToEntity();
+            this.ProposalPaymentsRepository.Add(entity);
+            await this.ProposalPaymentsRepository.SaveAll();
         }
 
     }

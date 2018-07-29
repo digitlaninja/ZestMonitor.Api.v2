@@ -2,6 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.1</TargetFramework>
+    <UserSecretsId>20a3a472-94d3-4a93-9b9c-49e42fc4e72b</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
@@ -9,8 +10,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="GlobalExceptionHandler" Version="3.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.App" />
     <PackageReference Include="FluentValidation.AspNetCore" Version="7.6.104" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="2.1.1" />
     <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="2.1.1" />
 
   </ItemGroup>

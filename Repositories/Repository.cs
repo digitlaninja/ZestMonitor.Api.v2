@@ -36,32 +36,32 @@ namespace ZestMonitor.Api.Repositories
         public async void Add(TEntity entity)
         {
             await this.Context.Set<TEntity>().AddAsync(entity);
-            await this.Context.SaveChangesAsync();
         }
 
         public async void AddRange(IEnumerable<TEntity> entities)
         {
             await this.Context.Set<TEntity>().AddRangeAsync(entities);
-            await this.Context.SaveChangesAsync();
         }
 
-        public async void Remove(int id)
+        public void Remove(int id)
         {
             var entity = this.Get(id);
             this.Context.Remove(entity);
-            await this.Context.SaveChangesAsync();
         }
 
-        public async void Remove(TEntity entity)
+        public void Remove(TEntity entity)
         {
             this.Context.Remove(entity);
-            await this.Context.SaveChangesAsync();
         }
 
-        public async void RemoveRange(IEnumerable<TEntity> entities)
+        public void RemoveRange(IEnumerable<TEntity> entities)
         {
             this.Context.RemoveRange(entities);
-            await this.Context.SaveChangesAsync();
+        }
+
+        public async Task<bool> SaveAll()
+        {
+            return await this.Context.SaveChangesAsync() > 0;
         }
     }
 }
