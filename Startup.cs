@@ -56,7 +56,11 @@ namespace ZestMonitor.Api
             services.AddSingleton<IValidator<ProposalPaymentsModel>, ProposalPaymentsValidator>();
             services.AddTransient<ProposalPaymentsService>();
             services.AddTransient<IProposalPaymentsRepository, ProposalPaymentsRepository>();
+            services.AddTransient<IUserRepository, UserRepository>();
+
             services.AddTransient<IRepository<IProposalPaymentsRepository>, Repository<IProposalPaymentsRepository>>();
+            services.AddTransient<IRepository<IUserRepository>, Repository<IUserRepository>>();
+            services.AddTransient<IRepository<User>, Repository<User>>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

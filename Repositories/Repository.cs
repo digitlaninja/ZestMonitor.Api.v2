@@ -20,7 +20,7 @@ namespace ZestMonitor.Api.Repositories
 
         public async Task<TEntity> Get(int id)
         {
-            return await this.Context.Set<TEntity>().FindAsync();
+            return await this.Context.Set<TEntity>().FindAsync(id);
         }
 
         public async Task<IEnumerable<TEntity>> GetAll()
@@ -33,12 +33,12 @@ namespace ZestMonitor.Api.Repositories
             return await this.Context.Set<TEntity>().Where(predicate).ToListAsync();
         }
 
-        public async void Add(TEntity entity)
+        public async Task Add(TEntity entity)
         {
             await this.Context.Set<TEntity>().AddAsync(entity);
         }
 
-        public async void AddRange(IEnumerable<TEntity> entities)
+        public async Task AddRange(IEnumerable<TEntity> entities)
         {
             await this.Context.Set<TEntity>().AddRangeAsync(entities);
         }

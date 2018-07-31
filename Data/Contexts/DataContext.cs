@@ -1,5 +1,7 @@
     using Microsoft.EntityFrameworkCore;
 using ZestMonitor.Api.Data.Entities;
+using ZestMonitor.Api.Data.Maps;
+using ZestMonitor.Api.Data.Models;
 
 namespace ZestMonitor.Api.Data.Contexts
 {
@@ -8,17 +10,14 @@ namespace ZestMonitor.Api.Data.Contexts
         public ZestContext(DbContextOptions<ZestContext> options) : base(options) { }
 
         public DbSet<ProposalPayments> ProposalPayments { get; set; }
+        public DbSet<User> Users { get; set; }
 
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
+
+        protected override void OnModelCreating(ModelBuilder builder)
         {
-            modelBuilder.Entity<ProposalPayments>().HasKey(x => x.Id);
-
-            modelBuilder.Entity<ProposalPayments>().Property(x => x.Amount).IsRequired();
-            modelBuilder.Entity<ProposalPayments>().Property(x => x.Hash).IsRequired();
-            modelBuilder.Entity<ProposalPayments>().Property(x => x.ExpectedPayment).IsRequired();
-            modelBuilder.Entity<ProposalPayments>().Property(x => x.ShortDescription);
-            modelBuilder.Entity<ProposalPayments>().Property(x => x.CreatedAt);
-            modelBuilder.Entity<ProposalPayments>().Property(x => x.UpdatedAt);
+          builder.ApplyConfiguration(new ProposalPaymentsMap());
+          builder.ApplyConfiguration(new UserMap());
         }
+
     }
 }
