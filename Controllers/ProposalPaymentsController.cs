@@ -38,8 +38,11 @@ namespace ZestMonitor.Api.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            await this.ProposalPaymentsService.Create(model);
-            return Ok(model);
+            var created = await this.ProposalPaymentsService.Create(model);
+            if (!created)
+                return BadRequest();
+
+            return StatusCode(201, model);
         }
 
     }

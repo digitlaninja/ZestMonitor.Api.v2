@@ -31,14 +31,22 @@ namespace ZestMonitor.Api.Services
             return proposals.ToModel();
         }
 
-        public async Task Create(ProposalPaymentsModel model)
+        public async Task<bool> Create(ProposalPaymentsModel model)
         {
             if (model == null)
                 throw new ArgumentNullException(nameof(model));
 
+            
             var entity = model.ToEntity();
-            this.ProposalPaymentsRepository.Add(entity);
-            await this.ProposalPaymentsRepository.SaveAll();
+            entity.CreatedAt = DateTime.Now;
+            
+            await this.ProposalPaymentsRepository.Add(entity);
+
+            var result = await this.ProposalPaymentsRepository.SaveAll();
+            if (!result)
+                return false;
+
+            return true;
         }
 
     }

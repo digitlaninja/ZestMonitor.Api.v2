@@ -8,11 +8,17 @@ namespace ZestMonitor.Api.Repositories
 {
     public class UserRepository : Repository<User>, IUserRepository
     {
-         public UserRepository(ZestContext context) : base(context) { }
+        public UserRepository(ZestContext context) : base(context) { }
 
-          public Task<User> Get(string username) {
-              return this.Context.Set<User>().FirstOrDefaultAsync(x => x.Username == username);
-          }
-        
+        public Task<User> Get(string username)
+        {
+            return this.Context.Set<User>().FirstOrDefaultAsync(x => x.Username == username);
+        }
+
+        public Task<bool> Exists(string username)
+        {
+            return this.Context.Set<User>().AnyAsync(x => x.Username == username);
+        }
+
     }
 }
