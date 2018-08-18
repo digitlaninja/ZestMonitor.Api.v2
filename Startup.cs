@@ -25,6 +25,9 @@ using ZestMonitor.Api.Data.Abstract.Interfaces;
 using ZestMonitor.Api.Repositories;
 using Microsoft.Extensions.Logging.Console;
 using ZestMonitor.Api.Middleware;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 namespace ZestMonitor.Api
 {
@@ -55,6 +58,18 @@ namespace ZestMonitor.Api
             });
 
             services.RegisterZestDependancies();
+
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+            .AddJwtBearer(options => {
+                options.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidateIssuerSigningKey = true,
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(Configuration.GetSection("AppSettings:Token").Value)),
+                        ValidateIssuer = false,
+                        ValidateAudience = false
+                    };
+                });
+           
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -83,6 +98,8 @@ namespace ZestMonitor.Api
 
             app.UseCors("AllowAll");
 
+            // Enforce Authentication configuration (jwt)
+            app.UseAuthentication();
             // app.UseHttpsRedirection();
             app.UseMvc();
         }

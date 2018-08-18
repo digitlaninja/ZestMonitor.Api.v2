@@ -1,7 +1,10 @@
 using System;
 using System.Net;
+using System.Security.Claims;
+using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
 using ZestMonitor.Api.Data.Models;
 using ZestMonitor.Api.Services;
 
@@ -38,16 +41,19 @@ namespace ZestMonitor.Api.Controllers
         }
         
         [HttpPost("login")]
-        public async Task<IActionResult> Login([FromBody] UserLoginModel user)
+        public async Task<IActionResult> Login([FromBody] UserLoginModel model)
         {
             if(!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-                var result = await this.AuthService.Login(user);
-                if(!result)
-                    return BadRequest(new {Errors = "User not found."});
+                var validUser = await this.AuthService.Login(model);
 
-                return Ok();
+                // dont show user not found or any messages with hints, simply unath
+                if(validUser == null)
+                    return Unauthorized();
+
+                var accessToken = this.AuthService.CreateJwtAccessToken(validUser);
+                return Ok(new {token = accessToken});
         }
     }
 }

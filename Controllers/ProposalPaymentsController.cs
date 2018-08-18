@@ -45,5 +45,13 @@ namespace ZestMonitor.Api.Controllers
             return StatusCode(201, model);
         }
 
+        [HttpGet("block-proposals")]
+        public async Task<IActionResult> GetBlockchainProposals()
+        {
+            this.ProposalPaymentsService.GetBlockchainProposals();
+            return Ok();
+        }
+        
+
     }
 }
