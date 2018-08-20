@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using FluentValidation.Attributes;
 using ZestMonitor.Api.Validation;
 

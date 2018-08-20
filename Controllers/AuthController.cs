@@ -23,7 +23,7 @@ namespace ZestMonitor.Api.Controllers
         public async Task<IActionResult> Register([FromBody] UserRegistrationModel user)
         {
             if (!ModelState.IsValid)
-                return BadRequest(ModelState);
+                return BadRequest(ModelState.Values);
 
             user.Username = user.Username.ToLower();
 
@@ -44,7 +44,7 @@ namespace ZestMonitor.Api.Controllers
         public async Task<IActionResult> Login([FromBody] UserLoginModel model)
         {
             if(!ModelState.IsValid)
-                return BadRequest(ModelState);
+                return BadRequest(ModelState.Values);
 
                 var validUser = await this.AuthService.Login(model);
 

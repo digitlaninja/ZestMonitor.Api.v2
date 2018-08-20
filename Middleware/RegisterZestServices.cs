@@ -17,6 +17,7 @@ namespace ZestMonitor.Api.Middleware
 
             services.AddSingleton<IValidator<ProposalPaymentsModel>, ProposalPaymentsValidator>();
             services.AddSingleton<IValidator<UserRegistrationModel>, UserRegistrationValidator>();
+            services.AddSingleton<IValidator<UserLoginModel>, UserLoginValidator>();
             
             services.AddScoped<ProposalPaymentsService>();
             services.AddScoped<AuthService>();

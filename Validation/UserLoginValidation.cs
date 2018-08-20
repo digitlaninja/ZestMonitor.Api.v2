@@ -8,8 +8,13 @@ namespace ZestMonitor.Api.Validation
     {
         public UserLoginValidator()
         {
-            RuleFor(x => x.Username).NotNull().NotEmpty().WithMessage("Please enter your existing username.");
-            RuleFor(x => x.Password).NotNull().NotEmpty().WithMessage("Please enter your existing password.");
+            RuleFor(x => x.Username)
+                .NotNull().WithMessage("Please enter your existing username.")
+                .NotEmpty().WithMessage("Please enter your existing username.");
+
+            RuleFor(x => x.Password)
+                .NotNull().WithMessage("Please enter your existing password.")
+                .NotEmpty().WithMessage("Please enter your existing password.");
         }
     }
 }
