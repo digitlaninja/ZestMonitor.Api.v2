@@ -51,7 +51,7 @@ namespace ZestMonitor.Api.Controllers
             this.ProposalPaymentsService.GetBlockchainProposals();
             return Ok();
         }
-        
+
 
     }
 }
