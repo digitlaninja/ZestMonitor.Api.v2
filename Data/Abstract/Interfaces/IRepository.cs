@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
@@ -10,7 +11,7 @@ namespace ZestMonitor.Api.Data.Abstract.Interfaces
     {
         Task<TEntity> Get(int id);
 
-        Task<IEnumerable<TEntity>> GetAll();
+        IQueryable<TEntity> GetAll();
         Task<IEnumerable<TEntity>> Find(Expression<Func<TEntity, bool>> predicate);
         Task Add(TEntity entity);
         Task AddRange(IEnumerable<TEntity> entities);

@@ -34,6 +34,27 @@ public static class ProposalPaymentsFactory
         return model;
     }
 
+    public static PagedList<ProposalPaymentsModel> ToModel(this PagedList<ProposalPayments> entities)
+    {
+        if (entities == null)
+            throw new System.ArgumentNullException(nameof(entities));
+
+        var model = new PagedList<ProposalPaymentsModel>();
+
+        model.PageSize = entities.PageSize;
+        model.CurrentPage = entities.CurrentPage;
+        model.TotalCount = entities.TotalCount;
+        model.TotalPages = entities.TotalPages;
+
+        foreach (var entity in entities)
+        {
+            model.Add(entity.ToModel());
+        }
+
+
+        return model;
+    }
+
     public static ProposalPayments ToEntity(this ProposalPaymentsModel model)
     {
         if (model == null)

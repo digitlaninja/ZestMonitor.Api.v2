@@ -13,12 +13,14 @@ namespace ZestMonitor.Api.Data.Models
         public int PageSize { get; set; }
         public int TotalCount { get; set; }
 
+        public PagedList() { }
         public PagedList(List<T> items, int count, int pageNumber, int pageSize)
         {
             this.CurrentPage = pageNumber;
             this.TotalPages = (int)Math.Ceiling(count / (double)pageSize);
             this.PageSize = pageSize;
             this.TotalCount = count;
+            this.AddRange(items);
         }
 
         public static async Task<PagedList<T>> CreateAsync(IQueryable<T> source, int pageNumber, int pageSize)

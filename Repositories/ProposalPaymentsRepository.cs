@@ -5,6 +5,8 @@ using Microsoft.EntityFrameworkCore;
 using ZestMonitor.Api.Data.Abstract.Interfaces;
 using ZestMonitor.Api.Data.Contexts;
 using ZestMonitor.Api.Data.Entities;
+using ZestMonitor.Api.Data.Models;
+using ZestMonitor.Api.Helpers;
 
 namespace ZestMonitor.Api.Repositories
 {
@@ -12,13 +14,17 @@ namespace ZestMonitor.Api.Repositories
     {
         public ProposalPaymentsRepository(ZestContext context) : base(context) { }
 
-        public async Task<IEnumerable<ProposalPayments>> GetPaged(int page = 1, int limit = 10)
+        public async Task<PagedList<ProposalPayments>> GetPaged(PagingParams pagingParams)
         {
-            var entities = await this.GetAll();
-            if (entities.Count() <= 0 || entities == null)
-                return new List<ProposalPayments>();
+            if (pagingParams == null)
+                throw new System.ArgumentNullException(nameof(pagingParams));
 
-            return entities.Skip((page - 1) * 10).Take(limit);
+            var entities = this.GetAll();
+            if (entities.Count() <= 0 || entities == null)
+                return new PagedList<ProposalPayments>();
+
+            return await PagedList<ProposalPayments>.CreateAsync(entities, pagingParams.PageNumber, pagingParams.PageSize);
+            // return entities.Skip((page - 1) * 10).Take(limit);
         }
     }
 }

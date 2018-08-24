@@ -23,9 +23,9 @@ namespace ZestMonitor.Api.Repositories
             return await this.Context.Set<TEntity>().FindAsync(id);
         }
 
-        public async Task<IEnumerable<TEntity>> GetAll()
+        public IQueryable<TEntity> GetAll()
         {
-            return await this.Context.Set<TEntity>().ToListAsync();
+            return this.Context.Set<TEntity>();
         }
 
         public async Task<IEnumerable<TEntity>> Find(Expression<Func<TEntity, bool>> predicate)

@@ -9,7 +9,7 @@ namespace ZestMonitor.Api.Helpers
 
         public PaginationHeader(int currentPage, int itemsPerPage, int totalItems, int totalPages)
         {
-            CurrentPage = currentPage;
+            this.CurrentPage = currentPage;
             this.ItemsPerPage = itemsPerPage;
             this.TotalItems = totalItems;
             this.TotalPages = totalPages;

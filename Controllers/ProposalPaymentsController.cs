@@ -6,6 +6,8 @@ using Microsoft.EntityFrameworkCore;
 using ZestMonitor.Api.Data.Abstract.Interfaces;
 using ZestMonitor.Api.Data.Contexts;
 using ZestMonitor.Api.Data.Models;
+using ZestMonitor.Api.Extensions;
+using ZestMonitor.Api.Helpers;
 using ZestMonitor.Api.Services;
 
 namespace ZestMonitor.Api.Controllers
@@ -22,13 +24,15 @@ namespace ZestMonitor.Api.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetProposals(int page = 1, int limit = 10)
+        public async Task<IActionResult> GetProposalPayments([FromQuery] PagingParams pagingParams)
         {
-            var proposals = await this.ProposalPaymentsService.GetPaged(page, limit);
-            if (proposals == null)
-                return NotFound(new { Error = "Proposals found" });
+            var result = await this.ProposalPaymentsService.GetPaged(pagingParams);
+            if (result == null)
+                return NotFound(new { Error = "Proposal Payments not found" });
 
-            var result = proposals.ToList();
+            // build response
+            Response.AddPagination(result.CurrentPage, result.PageSize, result.TotalCount, result.TotalPages);
+
             return Ok(result);
         }
 

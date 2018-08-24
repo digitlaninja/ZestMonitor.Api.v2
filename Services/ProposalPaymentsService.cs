@@ -12,6 +12,8 @@ using Newtonsoft.Json.Linq;
 using ZestMonitor.Api.Data.Abstract.Interfaces;
 using ZestMonitor.Api.Data.Entities;
 using ZestMonitor.Api.Data.Models;
+using ZestMonitor.Api.Helpers;
+
 namespace ZestMonitor.Api.Services
 {
     public class ProposalPaymentsService
@@ -28,14 +30,15 @@ namespace ZestMonitor.Api.Services
 
         public async Task<IEnumerable<ProposalPaymentsModel>> GetAll()
         {
-            var proposals = await this.ProposalPaymentsRepository.GetAll();
+            var proposals = await this.ProposalPaymentsRepository.GetAll().ToListAsync();
             return proposals.ToModel();
         }
 
-        public async Task<IEnumerable<ProposalPaymentsModel>> GetPaged(int page = 1, int limit = 10)
+        public async Task<PagedList<ProposalPaymentsModel>> GetPaged(PagingParams pagingParams)
         {
-            var proposals = await this.ProposalPaymentsRepository.GetPaged(page, limit);
-            return proposals.ToList()?.ToModel();
+            var proposals = await this.ProposalPaymentsRepository.GetPaged(pagingParams);
+            var model = proposals.ToModel();
+            return model;
         }
 
         public async Task<bool> Create(ProposalPaymentsModel model)
