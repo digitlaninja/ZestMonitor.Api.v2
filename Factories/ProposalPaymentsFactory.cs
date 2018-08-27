@@ -15,7 +15,8 @@ public static class ProposalPaymentsFactory
             Hash = entity.Hash,
             ShortDescription = entity.ShortDescription,
             Amount = entity.Amount,
-            ExpectedPayment = entity.ExpectedPayment
+            ExpectedPayment = entity.ExpectedPayment,
+            DateCreated = entity.CreatedAt.ToLocalTime().ToString("yyyy/MM/dd/HH")	
         };
     }
 
@@ -50,8 +51,6 @@ public static class ProposalPaymentsFactory
         {
             model.Add(entity.ToModel());
         }
-
-
         return model;
     }
 

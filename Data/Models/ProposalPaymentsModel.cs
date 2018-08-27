@@ -10,5 +10,7 @@ namespace ZestMonitor.Api.Data.Models
         public string ShortDescription { get; set; }
         public int Amount { get; set; }
         public int ExpectedPayment { get; set; }
+        public string DateCreated { get; set; }
+
     }
 }
