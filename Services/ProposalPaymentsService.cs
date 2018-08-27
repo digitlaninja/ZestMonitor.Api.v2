@@ -61,10 +61,10 @@ namespace ZestMonitor.Api.Services
 
         public void GetBlockchainProposals()
         {
-            // try {
+            try {
 
             HttpWebRequest webRequest = (HttpWebRequest)WebRequest.Create("http://localhost:51473");
-            webRequest.Credentials = new NetworkCredential("replaced", "replaced");
+            webRequest.Credentials = new NetworkCredential("user", "pass");
 
             /// important, otherwise the service can't desirialse your request properly
             webRequest.ContentType = "application/json-rpc";
@@ -73,7 +73,7 @@ namespace ZestMonitor.Api.Services
             JObject jObject = new JObject();
             jObject.Add(new JProperty("jsonrpc", "1.0"));
             jObject.Add(new JProperty("id", "1"));
-            jObject.Add(new JProperty("method", "getinfo"));
+            jObject.Add(new JProperty("method", "mnbudget"));
 
             // if (Params.Keys.Count == 0)
             // {
@@ -81,35 +81,30 @@ namespace ZestMonitor.Api.Services
             // }
             // else
             // {
-            // JArray props = new JArray();
-            // // add the props in the reverse order!
+            JArray props = new JArray() {"show"};
+            // add the props in the reverse order!
             // for (int i = Params.Keys.Count - 1; i >= 0; i--)
             // {
-            //     .... // add the params
+                // .... // add the params
             // }
-            // jObject.Add(new JProperty("params", props));
+            jObject.Add(new JProperty("params", props));
             // }
 
-            // // serialize json for the request
-            // string s = JsonConvert.SerializeObject(jObject);
-            // byte[] byteArray = Encoding.UTF8.GetBytes(s);
-            // webRequest.ContentLength = byteArray.Length;
-            // Stream dataStream = webRequest.GetRequestStream();
-            // dataStream.Write(byteArray, 0, byteArray.Length);
-            // dataStream.Close();
+            // serialize json for the request
+            string s = JsonConvert.SerializeObject(jObject);
+            byte[] byteArray = Encoding.UTF8.GetBytes(s);
+            webRequest.ContentLength = byteArray.Length;
+            Stream dataStream = webRequest.GetRequestStream();
+            dataStream.Write(byteArray, 0, byteArray.Length);
+            dataStream.Close();
 
 
-            // WebResponse webResponse = webRequest.GetResponse();
-            // }
-            // params is a collection values which the method requires..
-
-
-
-            //             var x = 0;
-            // }
-            //             catch(Exception ex) {
-            //                 this.Logger.LogCritical(ex, $"{ex.InnerException}");
-            //             }
+            WebResponse webResponse = webRequest.GetResponse();
+           
+            }
+            catch(Exception ex) {
+                this.Logger.LogCritical(ex, $"{ex.InnerException}");
+            }
         }
     }
 }
