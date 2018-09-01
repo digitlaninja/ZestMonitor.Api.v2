@@ -60,7 +60,7 @@ namespace ZestMonitor.Api.Repositories
 
         public async Task<BlockchainProposal> GetProposal(string name)
         {
-            var command = "{ \"jsonrpc\": \"1.0\", \"id\":\"getbudgetinfo\", \"method\": \"getbudgetinfo\",\"params\": [\"${name}\"]}";
+            var command = $"{{ \"jsonrpc\": \"1.0\", \"id\":\"getbudgetinfo\", \"method\": \"getbudgetinfo\",\"params\": [\"{name}\"]}}";
 
             HttpWebRequest request = CreateRequest(command);
             var requestStream = request.GetRequestStream();
