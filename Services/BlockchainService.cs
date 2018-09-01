@@ -23,6 +23,14 @@ namespace ZestMonitor.Api.Services
             return await this.BlockchainRepository.GetProposals();
         }
 
+        public async Task<BlockchainProposal> GetProposal(string name)
+        {
+            if (string.IsNullOrEmpty(name))
+                return null;
+
+            return await this.BlockchainRepository.GetProposal(name);
+        }
+
         public async Task<int> GetValidCount()
         {
             return await this.BlockchainRepository.GetValidCount();

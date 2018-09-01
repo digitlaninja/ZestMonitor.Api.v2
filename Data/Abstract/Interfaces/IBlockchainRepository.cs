@@ -8,6 +8,7 @@ namespace ZestMonitor.Api.Data.Abstract.Interfaces
     public interface IBlockchainRepository
     {
         Task<List<BlockchainProposal>> GetProposals();
+        Task<BlockchainProposal> GetProposal(string name);
         HttpWebRequest CreateRequest(string json);
         Task<int> GetValidCount();
         Task<int> GetFundedCount();

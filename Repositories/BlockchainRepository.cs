@@ -15,6 +15,7 @@ namespace ZestMonitor.Api.Repositories
     public class BlockchainRepository : IBlockchainRepository
     {
         private readonly string GetProposalsCommand = "{ \"jsonrpc\": \"1.0\", \"id\":\"getproposals\", \"method\": \"mnbudget\",\"params\":[\"show\"]}";
+        // private readonly string GetProposalCommand = "{ \"jsonrpc\": \"1.0\", \"id\":\"getbudgetinfo\", \"method\": \"getbudgetinfo\",\"params\":[\"show\"]}";
 
         public async Task<List<BlockchainProposal>> GetProposals()
         {
@@ -57,6 +58,51 @@ namespace ZestMonitor.Api.Repositories
             }
         }
 
+        public async Task<BlockchainProposal> GetProposal(string name)
+        {
+            var command = "{ \"jsonrpc\": \"1.0\", \"id\":\"getbudgetinfo\", \"method\": \"getbudgetinfo\",\"params\": [\"${name}\"]}";
+
+            HttpWebRequest request = CreateRequest(command);
+            var requestStream = request.GetRequestStream();
+            using (StreamWriter streamWriter = new StreamWriter(requestStream))
+            {
+                streamWriter.Write(command);
+            }
+
+            try
+            {
+                // Make request and read response stream
+                using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
+                using (StreamReader streamReader = new StreamReader(response.GetResponseStream()))
+                {
+                    var responseData = await streamReader.ReadToEndAsync();
+                    if (string.IsNullOrEmpty(responseData))
+                        throw new ArgumentNullException($"{nameof(responseData)} is empty.");
+
+                    var jObject = JObject.Parse(responseData);
+                    // We need to extract the result object
+                    var resultKey = jObject.SelectToken("result");
+                    var result = JsonConvert.DeserializeObject<BlockchainProposal>(resultKey?.ToString());
+
+                    return result;
+                }
+            }
+            catch (WebException wex)
+            {
+                using (HttpWebResponse response = (HttpWebResponse)wex.Response)
+                using (StreamReader sr = new StreamReader(response.GetResponseStream()))
+                {
+                    if (response.StatusCode != HttpStatusCode.InternalServerError)
+                    {
+                        return null;
+                    }
+                    return null;
+                }
+            }
+        }
+
+
+
         public HttpWebRequest CreateRequest(string json)
         {
             HttpWebRequest request = (HttpWebRequest)WebRequest.Create("http://localhost:51473");
@@ -86,5 +132,6 @@ namespace ZestMonitor.Api.Repositories
 
             return result;
         }
+
     }
 }

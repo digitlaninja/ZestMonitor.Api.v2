@@ -7,20 +7,29 @@ using ZestMonitor.Api.Services;
 namespace ZestMonitor.Api.Controllers
 {
     [Route("api/[controller]")]
-    public class BlockchainController : ControllerBase
+    public class BlockchainProposalsController : ControllerBase
     {
-
         private BlockchainService BlockchainService { get; }
 
-        public BlockchainController(BlockchainService blockchainService)
+        public BlockchainProposalsController(BlockchainService blockchainService)
         {
             this.BlockchainService = blockchainService ?? throw new ArgumentNullException(nameof(blockchainService));
         }
 
-        [HttpGet("proposals")]
+        [HttpGet]
         public async Task<IActionResult> GetBlockchainProposals()
         {
             var result = await this.BlockchainService.GetProposals();
+            if (result == null)
+                return BadRequest();
+
+            return Ok(result);
+        }
+
+        [HttpGet("{name:proposalname}")]
+        public async Task<IActionResult> GetBlockchainProposal([FromRoute]string name)
+        {
+            var result = await this.BlockchainService.GetProposal(name);
             if (result == null)
                 return BadRequest();
 
@@ -35,6 +44,7 @@ namespace ZestMonitor.Api.Controllers
                 ValidProposalCount = await this.BlockchainService.GetValidCount(),
                 FundedProposalCount = await this.BlockchainService.GetFundedCount()
             };
+
             return Ok(result);
         }
     }

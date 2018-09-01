@@ -28,6 +28,8 @@ using ZestMonitor.Api.Middleware;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using Microsoft.AspNetCore.Routing;
+using ZestMonitor.Api.CustomRouteConstraints;
 
 namespace ZestMonitor.Api
 {
@@ -48,14 +50,16 @@ namespace ZestMonitor.Api
             services.AddDbContext<ZestContext>(x => x.UseMySql(Configuration["ConnectionStrings:Default"]));
             services.AddScoped<Seed>();
             services.AddMvc().AddFluentValidation();
+            services.Configure<RouteOptions>(options =>
+            options.ConstraintMap.Add("proposalname", typeof(ProposalNameRouteConstraint)));
             services.AddCors(options =>
-            {
-                options.AddPolicy("AllowAll",
-                        p => p.AllowAnyOrigin()
-                                .AllowAnyHeader()
-                                .AllowAnyMethod()
-                                .AllowCredentials());
-            });
+                {
+                    options.AddPolicy("AllowAll",
+                            p => p.AllowAnyOrigin()
+                                    .AllowAnyHeader()
+                                    .AllowAnyMethod()
+                                    .AllowCredentials());
+                });
 
             services.RegisterZestDependancies();
 

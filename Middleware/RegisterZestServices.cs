@@ -21,6 +21,7 @@ namespace ZestMonitor.Api.Middleware
             services.AddSingleton<IValidator<ProposalMetadataModel>, ProposalMetaDataValidator>();
 
             services.AddScoped<ProposalPaymentsService>();
+            services.AddScoped<BlockchainService>();
             services.AddScoped<AuthService>();
 
             services.AddScoped<IProposalPaymentsRepository, ProposalPaymentsRepository>();
