@@ -18,15 +18,16 @@ namespace ZestMonitor.Api.Middleware
             services.AddSingleton<IValidator<ProposalPaymentsModel>, ProposalPaymentsValidator>();
             services.AddSingleton<IValidator<UserRegistrationModel>, UserRegistrationValidator>();
             services.AddSingleton<IValidator<UserLoginModel>, UserLoginValidator>();
-            
+
             services.AddScoped<ProposalPaymentsService>();
             services.AddScoped<AuthService>();
-            
+
             services.AddScoped<IProposalPaymentsRepository, ProposalPaymentsRepository>();
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<IRepository<IProposalPaymentsRepository>, Repository<IProposalPaymentsRepository>>();
             services.AddScoped<IRepository<IUserRepository>, Repository<IUserRepository>>();
             services.AddScoped<IUserRepository, UserRepository>();
+            services.AddScoped<IBlockchainRepository, BlockchainRepository>();
         }
     }
 }
