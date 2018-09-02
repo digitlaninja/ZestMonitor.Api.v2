@@ -15,7 +15,6 @@ namespace ZestMonitor.Api.Repositories
     public class BlockchainRepository : IBlockchainRepository
     {
         private readonly string GetProposalsCommand = "{ \"jsonrpc\": \"1.0\", \"id\":\"getproposals\", \"method\": \"mnbudget\",\"params\":[\"show\"]}";
-        // private readonly string GetProposalCommand = "{ \"jsonrpc\": \"1.0\", \"id\":\"getbudgetinfo\", \"method\": \"getbudgetinfo\",\"params\":[\"show\"]}";
 
         public async Task<List<BlockchainProposal>> GetProposals()
         {
@@ -81,8 +80,8 @@ namespace ZestMonitor.Api.Repositories
 
                     var jObject = JObject.Parse(responseData);
                     // We need to extract the result object
-                    var resultKey = jObject.SelectToken("result");
-                    var result = JsonConvert.DeserializeObject<BlockchainProposal>(resultKey?.ToString());
+                    var proposalKey = jObject.SelectToken("result").First();
+                    var result = JsonConvert.DeserializeObject<BlockchainProposal>(proposalKey?.ToString());
 
                     return result;
                 }
@@ -121,6 +120,9 @@ namespace ZestMonitor.Api.Repositories
         public async Task<int> GetValidCount()
         {
             var proposals = await this.GetProposals();
+            if (proposals == null)
+                return -1;
+
             var result = proposals.Count(x => x.IsValid);
             return result;
         }
@@ -128,10 +130,30 @@ namespace ZestMonitor.Api.Repositories
         public async Task<int> GetFundedCount()
         {
             var proposals = await this.GetProposals();
+            if (proposals == null)
+                return -1;
+
             var result = proposals.Count(x => x.IsEstablished);
 
             return result;
         }
+
+        public async Task<ProposalMetadataModel> GetMetadata()
+        {
+            var proposals = await this.GetProposals();
+            if (proposals == null)
+                return null;
+
+            var validCount = proposals.Count(x => x.IsValid);
+            var fundedCount = proposals.Count(x => x.IsEstablished);
+
+            return new ProposalMetadataModel()
+            {
+                ValidProposalCount = validCount,
+                FundedProposalCount = fundedCount
+            };
+        }
+
 
     }
 }

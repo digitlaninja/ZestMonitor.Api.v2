@@ -40,5 +40,10 @@ namespace ZestMonitor.Api.Services
         {
             return await this.BlockchainRepository.GetFundedCount();
         }
+
+        public async Task<ProposalMetadataModel> GetProposalMetadata()
+        {
+            return await this.BlockchainRepository.GetMetadata();
+        }
     }
 }

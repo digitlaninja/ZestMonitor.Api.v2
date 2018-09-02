@@ -39,11 +39,9 @@ namespace ZestMonitor.Api.Controllers
         [HttpGet("metadata")]
         public async Task<IActionResult> GetProposalMetadata()
         {
-            var result = new ProposalMetadataModel()
-            {
-                ValidProposalCount = await this.BlockchainService.GetValidCount(),
-                FundedProposalCount = await this.BlockchainService.GetFundedCount()
-            };
+            var result = await this.BlockchainService.GetProposalMetadata();
+            if (result == null)
+                return BadRequest();
 
             return Ok(result);
         }

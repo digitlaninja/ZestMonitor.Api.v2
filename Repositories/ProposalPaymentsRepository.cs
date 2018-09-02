@@ -19,11 +19,20 @@ namespace ZestMonitor.Api.Repositories
             if (pagingParams == null)
                 throw new System.ArgumentNullException(nameof(pagingParams));
 
-            var entities = this.GetAll().OrderByDescending(x => x.CreatedAt);
+            var query = this.GetAll();
+            var entities = query.OrderByDescending(x => x.CreatedAt);
             if (entities.Count() <= 0 || entities == null)
                 return new PagedList<ProposalPayments>();
 
             return await PagedList<ProposalPayments>.CreateAsync(entities, pagingParams.PageNumber, pagingParams.PageSize);
         }
+
+        public async Task<ProposalPayments> Get(string hash)
+        {
+            var query = this.GetAll();
+            var entity = await query.FirstOrDefaultAsync(x => x.Hash == hash);
+            return entity;
+        }
+
     }
 }

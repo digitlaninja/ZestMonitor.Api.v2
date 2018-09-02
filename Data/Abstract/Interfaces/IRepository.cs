@@ -10,7 +10,6 @@ namespace ZestMonitor.Api.Data.Abstract.Interfaces
     public interface IRepository<TEntity> where TEntity : class
     {
         Task<TEntity> Get(int id);
-
         IQueryable<TEntity> GetAll();
         Task<IEnumerable<TEntity>> Find(Expression<Func<TEntity, bool>> predicate);
         Task Add(TEntity entity);

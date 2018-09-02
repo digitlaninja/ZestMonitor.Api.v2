@@ -40,8 +40,18 @@ namespace ZestMonitor.Api.Services
 
         public async Task<PagedList<ProposalPaymentsModel>> GetPaged(PagingParams pagingParams)
         {
+            if (pagingParams == null)
+                return null;
+
             var proposals = await this.ProposalPaymentsRepository.GetPaged(pagingParams);
             var model = proposals.ToModel();
+            return model;
+        }
+
+        public async Task<ProposalPaymentsModel> Get(string hash)
+        {
+            var proposal = await this.ProposalPaymentsRepository.Get(hash);
+            var model = proposal.ToModel();
             return model;
         }
 

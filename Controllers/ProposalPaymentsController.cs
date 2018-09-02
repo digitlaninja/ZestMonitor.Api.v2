@@ -36,6 +36,19 @@ namespace ZestMonitor.Api.Controllers
             return Ok(result);
         }
 
+        [HttpGet("{hash}")]
+        public async Task<IActionResult> GetProposalPayment(string hash)
+        {
+            if (string.IsNullOrEmpty(hash))
+                return BadRequest();
+
+            var result = await this.ProposalPaymentsService.Get(hash);
+            if (result == null)
+                return NotFound(new { error = "Proposal Payments not found" });
+
+            return Ok(result);
+        }
+
         [HttpPost]
         public async Task<IActionResult> CreateProposal([FromBody] ProposalPaymentsModel model)
         {

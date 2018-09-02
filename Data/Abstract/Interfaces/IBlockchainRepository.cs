@@ -12,5 +12,6 @@ namespace ZestMonitor.Api.Data.Abstract.Interfaces
         HttpWebRequest CreateRequest(string json);
         Task<int> GetValidCount();
         Task<int> GetFundedCount();
+        Task<ProposalMetadataModel> GetMetadata();
     }
 }
