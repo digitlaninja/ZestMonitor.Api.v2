@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using ZestMonitor.Api.Data.Abstract.Interfaces;
+using ZestMonitor.Api.Data.Entities;
 using ZestMonitor.Api.Data.Models;
 
 namespace ZestMonitor.Api.Repositories
@@ -100,8 +101,6 @@ namespace ZestMonitor.Api.Repositories
             }
         }
 
-
-
         public HttpWebRequest CreateRequest(string json)
         {
             HttpWebRequest request = (HttpWebRequest)WebRequest.Create("http://localhost:51473");
@@ -115,7 +114,6 @@ namespace ZestMonitor.Api.Repositories
             request.Headers.Add("Authorization", "Basic " + auth);
             return request;
         }
-
 
         public async Task<int> GetValidCount()
         {

@@ -1,6 +1,6 @@
 using Newtonsoft.Json;
 
-namespace ZestMonitor.Api.Data.Models
+namespace ZestMonitor.Api.Data.Entities
 {
     public class BlockchainProposal
     {
@@ -17,13 +17,13 @@ namespace ZestMonitor.Api.Data.Models
         public string FeeHash { get; set; }
 
         [JsonProperty("yeas")]
-        public long Yeas { get; set; }
+        public int Yeas { get; set; }
 
         [JsonProperty("nays")]
-        public long Nays { get; set; }
+        public int Nays { get; set; }
 
         [JsonProperty("abstains")]
-        public long Abstains { get; set; }
+        public int Abstains { get; set; }
 
         [JsonProperty("isEstablished")]
         public bool IsEstablished { get; set; }

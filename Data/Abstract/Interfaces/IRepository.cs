@@ -11,7 +11,7 @@ namespace ZestMonitor.Api.Data.Abstract.Interfaces
     {
         Task<TEntity> Get(int id);
         IQueryable<TEntity> GetAll();
-        Task<IEnumerable<TEntity>> Find(Expression<Func<TEntity, bool>> predicate);
+        Task<IEnumerable<TEntity>> FindBy(Expression<Func<TEntity, bool>> predicate);
         Task Add(TEntity entity);
         Task AddRange(IEnumerable<TEntity> entities);
         void Remove(int id);

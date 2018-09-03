@@ -28,11 +28,9 @@ namespace ZestMonitor.Api.Controllers
         {
             var result = await this.ProposalPaymentsService.GetPaged(pagingParams);
             if (result == null)
-                return NotFound(new { Error = "Proposal Payments not found" });
+                return NotFound();
 
-            // build response
             Response.AddPagination(result.CurrentPage, result.PageSize, result.TotalCount, result.TotalPages);
-
             return Ok(result);
         }
 
@@ -44,7 +42,7 @@ namespace ZestMonitor.Api.Controllers
 
             var result = await this.ProposalPaymentsService.Get(hash);
             if (result == null)
-                return NotFound(new { error = "Proposal Payments not found" });
+                return NotFound();
 
             return Ok(result);
         }
@@ -60,6 +58,19 @@ namespace ZestMonitor.Api.Controllers
                 return BadRequest();
 
             return StatusCode(201, model);
+        }
+
+        [HttpDelete("{hash}")]
+        public async Task<IActionResult> DeleteProposal([FromRoute] string hash)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var deleted = await this.ProposalPaymentsService.Delete(hash);
+            if (!deleted)
+                return BadRequest();
+
+            return NoContent();
         }
     }
 }
