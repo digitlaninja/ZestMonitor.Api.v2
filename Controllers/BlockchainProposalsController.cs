@@ -2,6 +2,8 @@ using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using ZestMonitor.Api.Data.Models;
+using ZestMonitor.Api.Extensions;
+using ZestMonitor.Api.Helpers;
 using ZestMonitor.Api.Services;
 
 namespace ZestMonitor.Api.Controllers
@@ -17,12 +19,13 @@ namespace ZestMonitor.Api.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetBlockchainProposals()
+        public async Task<IActionResult> GetBlockchainProposals([FromQuery] PagingParams pagingParams)
         {
-            var result = await this.BlockchainService.GetProposals();
+            var result = await this.BlockchainService.GetPagedProposals(pagingParams);
             if (result == null)
                 return BadRequest();
 
+            Response.AddPagination(result.CurrentPage, result.PageSize, result.TotalCount, result.TotalPages);
             return Ok(result);
         }
 

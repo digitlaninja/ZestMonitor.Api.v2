@@ -6,6 +6,7 @@ using Microsoft.Extensions.Logging;
 using ZestMonitor.Api.Data.Abstract.Interfaces;
 using ZestMonitor.Api.Data.Entities;
 using ZestMonitor.Api.Data.Models;
+using ZestMonitor.Api.Helpers;
 
 namespace ZestMonitor.Api.Services
 {
@@ -22,10 +23,10 @@ namespace ZestMonitor.Api.Services
             this.ProposalPaymentsService = proposalPaymentsService ?? throw new ArgumentNullException(nameof(proposalPaymentsService));
         }
 
-        public async Task<List<BlockchainProposalModel>> GetProposals()
+        public async Task<PagedList<BlockchainProposalModel>> GetPagedProposals(PagingParams pagingParams)
         {
             var viewModel = new List<BlockchainProposalModel>();
-            var blockchainProposals = await this.BlockchainRepository.GetProposals();
+            var blockchainProposals = await this.BlockchainRepository.GetPagedProposals(pagingParams);
             var localProposals = await this.ProposalPaymentsService.GetAll();
 
             foreach (var blockchainProposal in blockchainProposals)
@@ -45,18 +46,19 @@ namespace ZestMonitor.Api.Services
                 model.Yeas = blockchainProposal.Yeas;
                 model.Nays = blockchainProposal.Nays;
                 model.Abstains = blockchainProposal.Abstains;
-                model.IsEstablished = blockchainProposal.IsEstablished;
-                model.IsValid = blockchainProposal.IsValid;
+                model.Ratio = Math.Round(blockchainProposal.Ratio, 2);
+                model.IsEstablished = blockchainProposal.IsEstablished ? "Yes" : "No";
+                model.IsValid = blockchainProposal.IsValid ? "Yes" : "No";
                 model.IsValidReason = blockchainProposal.IsValidReason;
-                model.FValid = blockchainProposal.FValid;
+                model.FValid = blockchainProposal.FValid ? "Yes" : "No";
 
                 viewModel.Add(model);
             }
-
-            return viewModel;
+            var pagedProposals = PagedList<BlockchainProposalModel>.CreateAsync(viewModel, pagingParams.PageNumber, pagingParams.PageSize);
+            return pagedProposals;
         }
 
-        public async Task<BlockchainProposal> GetProposal(string name)
+        public async Task<BlockchainProposalJson> GetProposal(string name)
         {
             if (string.IsNullOrEmpty(name))
                 return null;

@@ -10,6 +10,7 @@ using Newtonsoft.Json.Linq;
 using ZestMonitor.Api.Data.Abstract.Interfaces;
 using ZestMonitor.Api.Data.Entities;
 using ZestMonitor.Api.Data.Models;
+using ZestMonitor.Api.Helpers;
 
 namespace ZestMonitor.Api.Repositories
 {
@@ -17,7 +18,49 @@ namespace ZestMonitor.Api.Repositories
     {
         private readonly string GetProposalsCommand = "{ \"jsonrpc\": \"1.0\", \"id\":\"getproposals\", \"method\": \"mnbudget\",\"params\":[\"show\"]}";
 
-        public async Task<List<BlockchainProposal>> GetProposals()
+        public async Task<List<BlockchainProposalJson>> GetPagedProposals(PagingParams pagingParams)
+        {
+            HttpWebRequest request = CreateRequest(this.GetProposalsCommand);
+            var requestStream = request.GetRequestStream();
+            using (StreamWriter streamWriter = new StreamWriter(requestStream))
+            {
+                streamWriter.Write(this.GetProposalsCommand);
+            }
+
+            try
+            {
+                // Make request and read response stream
+                using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
+                using (StreamReader streamReader = new StreamReader(response.GetResponseStream()))
+                {
+                    var responseData = await streamReader.ReadToEndAsync();
+                    if (string.IsNullOrEmpty(responseData))
+                        throw new ArgumentNullException($"{nameof(responseData)} is empty.");
+
+                    var jObject = JObject.Parse(responseData);
+
+                    var resultKey = jObject.SelectToken("result");
+                    var result = JsonConvert.DeserializeObject<List<BlockchainProposalJson>>(resultKey?.ToString());
+                    return result;
+
+                }
+            }
+            catch (WebException wex)
+            {
+                using (HttpWebResponse response = (HttpWebResponse)wex.Response)
+                using (StreamReader sr = new StreamReader(response.GetResponseStream()))
+                {
+                    if (response.StatusCode != HttpStatusCode.InternalServerError)
+                    {
+                        return null;
+                    }
+                    return null;
+                }
+            }
+        }
+
+
+        public async Task<List<BlockchainProposalJson>> GetProposals()
         {
             HttpWebRequest request = CreateRequest(this.GetProposalsCommand);
             var requestStream = request.GetRequestStream();
@@ -39,7 +82,7 @@ namespace ZestMonitor.Api.Repositories
                     var jObject = JObject.Parse(responseData);
                     // We need to extract the result object
                     var resultKey = jObject.SelectToken("result");
-                    var result = JsonConvert.DeserializeObject<List<BlockchainProposal>>(resultKey?.ToString());
+                    var result = JsonConvert.DeserializeObject<List<BlockchainProposalJson>>(resultKey?.ToString());
 
                     return result;
                 }
@@ -58,7 +101,7 @@ namespace ZestMonitor.Api.Repositories
             }
         }
 
-        public async Task<BlockchainProposal> GetProposal(string name)
+        public async Task<BlockchainProposalJson> GetProposal(string name)
         {
             var command = $"{{ \"jsonrpc\": \"1.0\", \"id\":\"getbudgetinfo\", \"method\": \"getbudgetinfo\",\"params\": [\"{name}\"]}}";
 
@@ -82,7 +125,7 @@ namespace ZestMonitor.Api.Repositories
                     var jObject = JObject.Parse(responseData);
                     // We need to extract the result object
                     var proposalKey = jObject.SelectToken("result").First();
-                    var result = JsonConvert.DeserializeObject<BlockchainProposal>(proposalKey?.ToString());
+                    var result = JsonConvert.DeserializeObject<BlockchainProposalJson>(proposalKey?.ToString());
 
                     return result;
                 }

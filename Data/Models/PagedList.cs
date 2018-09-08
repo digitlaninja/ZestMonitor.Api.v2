@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using ZestMonitor.Api.Data.Entities;
 
 namespace ZestMonitor.Api.Data.Models
 {
@@ -30,6 +31,17 @@ namespace ZestMonitor.Api.Data.Models
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
                 .ToListAsync();
+
+            return new PagedList<T>(items, count, pageNumber, pageSize);
+        }
+
+        public static PagedList<T> CreateAsync(List<T> source, int pageNumber, int pageSize)
+        {
+            var count = source.Count();
+            var items = source
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize).ToList();
+
 
             return new PagedList<T>(items, count, pageNumber, pageSize);
         }
