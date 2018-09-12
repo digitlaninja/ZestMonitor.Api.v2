@@ -30,6 +30,9 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.AspNetCore.Routing;
 using ZestMonitor.Api.CustomRouteConstraints;
+using Hangfire;
+using Hangfire.MySql.Core;
+using System.Data;
 
 namespace ZestMonitor.Api
 {
@@ -48,21 +51,22 @@ namespace ZestMonitor.Api
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddDbContext<ZestContext>(x => x.UseMySql(Configuration["ConnectionStrings:Default"]));
+            services.AddHangfire(config => config.UseStorage(new MySqlStorage(Configuration["ConnectionStrings:Default"])));
+
             services.AddScoped<Seed>();
             services.AddMvc().AddFluentValidation();
             services.Configure<RouteOptions>(options =>
             options.ConstraintMap.Add("proposalname", typeof(ProposalNameRouteConstraint)));
             services.AddCors(options =>
-                {
-                    options.AddPolicy("AllowAll",
-                            p => p.AllowAnyOrigin()
-                                    .AllowAnyHeader()
-                                    .AllowAnyMethod()
-                                    .AllowCredentials());
-                });
+            {
+                options.AddPolicy("AllowAll",
+                        p => p.AllowAnyOrigin()
+                                .AllowAnyHeader()
+                                .AllowAnyMethod()
+                                .AllowCredentials());
+            });
 
             services.RegisterZestDependancies();
-
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(options =>
             {
@@ -74,16 +78,16 @@ namespace ZestMonitor.Api
                     ValidateAudience = false
                 };
             });
-
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env, Seed seed, ILoggerFactory loggerFactory)
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env, Seed seed, ILoggerFactory loggerFactory, IBlockchainRepository blockchainRepository)
         {
             app.UseCustomExceptionHandler(this._logger);
+            app.UseHangfireServer();
+            app.UseHangfireDashboard();
 
             app.Map("/error", x => x.Run(y => throw new Exception()));
-
             loggerFactory.AddProvider(new ConsoleLoggerProvider((category, logLevel) => logLevel >= LogLevel.Information, false));
             loggerFactory.AddConsole();
 
@@ -101,11 +105,16 @@ namespace ZestMonitor.Api
                 // app.UseHsts();
             }
 
+
+            RecurringJob.AddOrUpdate(() => blockchainRepository.SaveProposals(), "*/5 * * * *");
+
+
             app.UseCors("AllowAll");
 
             // Enforce Authentication configuration (jwt)
             app.UseAuthentication();
             // app.UseHttpsRedirection();
+
             app.UseMvc();
         }
     }

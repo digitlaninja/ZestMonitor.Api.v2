@@ -27,6 +27,7 @@ namespace ZestMonitor.Api.Middleware
             services.AddScoped<IProposalPaymentsRepository, ProposalPaymentsRepository>();
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<IRepository<IProposalPaymentsRepository>, Repository<IProposalPaymentsRepository>>();
+            services.AddScoped<IRepository<IBlockchainRepository>, Repository<IBlockchainRepository>>();
             services.AddScoped<IRepository<IUserRepository>, Repository<IUserRepository>>();
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<IBlockchainRepository, BlockchainRepository>();

@@ -1,3 +1,4 @@
+using System;
 using Newtonsoft.Json;
 
 namespace ZestMonitor.Api.Data.Models
@@ -17,5 +18,6 @@ namespace ZestMonitor.Api.Data.Models
         public string IsValid { get; set; }
         public string IsValidReason { get; set; }
         public string FValid { get; set; }
+        public DateTime? Time { get; internal set; }
     }
 }

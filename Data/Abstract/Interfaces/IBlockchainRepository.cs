@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -10,12 +11,15 @@ namespace ZestMonitor.Api.Data.Abstract.Interfaces
 {
     public interface IBlockchainRepository
     {
-        Task<List<BlockchainProposalJson>> GetProposals();
-        Task<List<BlockchainProposalJson>> GetPagedProposals(PagingParams pagingParams);
-        Task<BlockchainProposalJson> GetProposal(string name);
+        List<BlockchainProposalJson> GetProposals();
+        List<BlockchainProposalJson> GetPagedProposals(PagingParams pagingParams);
+        Task<List<BlockchainProposal>> GetLocalPagedBlockchainProposals();
+        BlockchainProposalJson GetProposal(string name);
+        DateTime? GetTime(string hash);
         HttpWebRequest CreateRequest(string json);
-        Task<int> GetValidCount();
-        Task<int> GetFundedCount();
-        Task<ProposalMetadataModel> GetMetadata();
+        int GetValidCount();
+        int GetFundedCount();
+        ProposalMetadataModel GetMetadata();
+        Task SaveProposals();
     }
 }

@@ -14,8 +14,7 @@ namespace ZestMonitor.Api.Repositories
 
         public Repository(DbContext context)
         {
-            this.Context = context ??
-                throw new ArgumentNullException(nameof(context));
+            this.Context = context ?? throw new ArgumentNullException(nameof(context));
         }
 
         public async Task<TEntity> Get(int id)

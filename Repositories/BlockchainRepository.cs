@@ -5,142 +5,119 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using ZestMonitor.Api.Data.Abstract.Interfaces;
+using ZestMonitor.Api.Data.Contexts;
 using ZestMonitor.Api.Data.Entities;
 using ZestMonitor.Api.Data.Models;
+using ZestMonitor.Api.Factories;
 using ZestMonitor.Api.Helpers;
 
 namespace ZestMonitor.Api.Repositories
 {
-    public class BlockchainRepository : IBlockchainRepository
+    public class BlockchainRepository : Repository<BlockchainProposal>, IBlockchainRepository
     {
-        private readonly string GetProposalsCommand = "{ \"jsonrpc\": \"1.0\", \"id\":\"getproposals\", \"method\": \"mnbudget\",\"params\":[\"show\"]}";
+        public BlockchainRepository(ZestContext context) : base(context) { }
 
-        public async Task<List<BlockchainProposalJson>> GetPagedProposals(PagingParams pagingParams)
+        private readonly string GetProposalsCommand = "{ \"jsonrpc\": \"1.0\", \"id\":\"getproposals\", \"m`ethod\": \"mnbudget\",\"params\":[\"show\"]}";
+
+        public async Task<List<BlockchainProposal>> GetLocalPagedBlockchainProposals()
         {
-            HttpWebRequest request = CreateRequest(this.GetProposalsCommand);
-            var requestStream = request.GetRequestStream();
-            using (StreamWriter streamWriter = new StreamWriter(requestStream))
-            {
-                streamWriter.Write(this.GetProposalsCommand);
-            }
-
-            try
-            {
-                // Make request and read response stream
-                using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
-                using (StreamReader streamReader = new StreamReader(response.GetResponseStream()))
-                {
-                    var responseData = await streamReader.ReadToEndAsync();
-                    if (string.IsNullOrEmpty(responseData))
-                        throw new ArgumentNullException($"{nameof(responseData)} is empty.");
-
-                    var jObject = JObject.Parse(responseData);
-
-                    var resultKey = jObject.SelectToken("result");
-                    var result = JsonConvert.DeserializeObject<List<BlockchainProposalJson>>(resultKey?.ToString());
-                    return result;
-
-                }
-            }
-            catch (WebException wex)
-            {
-                using (HttpWebResponse response = (HttpWebResponse)wex.Response)
-                using (StreamReader sr = new StreamReader(response.GetResponseStream()))
-                {
-                    if (response.StatusCode != HttpStatusCode.InternalServerError)
-                    {
-                        return null;
-                    }
-                    return null;
-                }
-            }
+            return await this.GetAll().ToListAsync();
         }
 
-
-        public async Task<List<BlockchainProposalJson>> GetProposals()
+        public List<BlockchainProposalJson> GetPagedProposals(PagingParams pagingParams)
         {
-            HttpWebRequest request = CreateRequest(this.GetProposalsCommand);
-            var requestStream = request.GetRequestStream();
-            using (StreamWriter streamWriter = new StreamWriter(requestStream))
-            {
-                streamWriter.Write(this.GetProposalsCommand);
-            }
-
-            try
-            {
-                // Make request and read response stream
-                using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
-                using (StreamReader streamReader = new StreamReader(response.GetResponseStream()))
-                {
-                    var responseData = await streamReader.ReadToEndAsync();
-                    if (string.IsNullOrEmpty(responseData))
-                        throw new ArgumentNullException($"{nameof(responseData)} is empty.");
-
-                    var jObject = JObject.Parse(responseData);
-                    // We need to extract the result object
-                    var resultKey = jObject.SelectToken("result");
-                    var result = JsonConvert.DeserializeObject<List<BlockchainProposalJson>>(resultKey?.ToString());
-
-                    return result;
-                }
-            }
-            catch (WebException wex)
-            {
-                using (HttpWebResponse response = (HttpWebResponse)wex.Response)
-                using (StreamReader sr = new StreamReader(response.GetResponseStream()))
-                {
-                    if (response.StatusCode != HttpStatusCode.InternalServerError)
-                    {
-                        return null;
-                    }
-                    return null;
-                }
-            }
+            var resultKey = this.ExecuteRPCCommand("mnbudget", new[] { "show" });
+            var result = JsonConvert.DeserializeObject<List<BlockchainProposalJson>>(resultKey?.ToString());
+            return result;
         }
 
-        public async Task<BlockchainProposalJson> GetProposal(string name)
+        public DateTime? GetTime(string hash)
         {
-            var command = $"{{ \"jsonrpc\": \"1.0\", \"id\":\"getbudgetinfo\", \"method\": \"getbudgetinfo\",\"params\": [\"{name}\"]}}";
+            var resultKey = this.ExecuteRPCCommand("getrawtransaction", new object[] { hash, 1 });
+            var timeKey = resultKey.SelectToken("time");
+            var result = this.ToDateTime(timeKey);
+            return result;
+        }
 
-            HttpWebRequest request = CreateRequest(command);
-            var requestStream = request.GetRequestStream();
-            using (StreamWriter streamWriter = new StreamWriter(requestStream))
-            {
-                streamWriter.Write(command);
-            }
+        private DateTime? ToDateTime(JToken timeKey)
+        {
+            var time = JsonConvert.DeserializeObject(timeKey?.ToString());
+            var result = Convert.ToDouble(time);
 
+            DateTime dateTime = new DateTime(1970, 1, 1, 0, 0, 0, 0, System.DateTimeKind.Utc);
+            dateTime = dateTime.AddSeconds(result).ToLocalTime();
+            return dateTime;
+        }
+
+        public List<BlockchainProposalJson> GetProposals()
+        {
+            var resultKey = this.ExecuteRPCCommand("mnbudget", new[] { "show" });
+            var result = JsonConvert.DeserializeObject<List<BlockchainProposalJson>>(resultKey?.ToString());
+            return result;
+        }
+
+        public BlockchainProposalJson GetProposal(string name)
+        {
+            var resultKey = this.ExecuteRPCCommand("getbudgetinfo", new[] { name });
+            var result = JsonConvert.DeserializeObject<BlockchainProposalJson>(resultKey?.ToString());
+            return result;
+        }
+
+        public JToken ExecuteRPCCommand(string command, params object[] parameters)
+        {
+            HttpWebRequest request = this.CreateRequest(command);
+            JObject jObject = this.CreateRequestJson(command, parameters);
+
+            string s = JsonConvert.SerializeObject(jObject);
+            // serialize json for the request
+            byte[] byteArray = Encoding.UTF8.GetBytes(s);
+            request.ContentLength = byteArray.Length;
             try
             {
-                // Make request and read response stream
-                using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
-                using (StreamReader streamReader = new StreamReader(response.GetResponseStream()))
+                using (Stream dataStream = request.GetRequestStream())
                 {
-                    var responseData = await streamReader.ReadToEndAsync();
+                    dataStream.Write(byteArray, 0, byteArray.Length);
+                }
+            }
+            catch (WebException we)
+            {
+                throw;
+            }
+            WebResponse webResponse = null;
+            try
+            {
+                using (webResponse = request.GetResponse())
+                using (Stream str = webResponse.GetResponseStream())
+                using (StreamReader sr = new StreamReader(str))
+                {
+                    var responseData = sr.ReadToEnd();
                     if (string.IsNullOrEmpty(responseData))
                         throw new ArgumentNullException($"{nameof(responseData)} is empty.");
 
-                    var jObject = JObject.Parse(responseData);
-                    // We need to extract the result object
-                    var proposalKey = jObject.SelectToken("result").First();
-                    var result = JsonConvert.DeserializeObject<BlockchainProposalJson>(proposalKey?.ToString());
-
-                    return result;
+                    var responseJObject = JsonConvert.DeserializeObject<JObject>(responseData);
+                    var resultKey = responseJObject.SelectToken("result");
+                    return resultKey;
                 }
             }
-            catch (WebException wex)
+            catch (WebException webex)
             {
-                using (HttpWebResponse response = (HttpWebResponse)wex.Response)
-                using (StreamReader sr = new StreamReader(response.GetResponseStream()))
+
+                using (Stream str = webex.Response.GetResponseStream())
+                using (StreamReader sr = new StreamReader(str))
                 {
-                    if (response.StatusCode != HttpStatusCode.InternalServerError)
-                    {
-                        return null;
-                    }
+                    var tempRet = JsonConvert.DeserializeObject<JObject>(sr.ReadToEnd());
                     return null;
                 }
+
+            }
+            catch (Exception)
+            {
+
+                throw;
             }
         }
 
@@ -158,9 +135,58 @@ namespace ZestMonitor.Api.Repositories
             return request;
         }
 
-        public async Task<int> GetValidCount()
+        public async Task SaveProposals()
         {
-            var proposals = await this.GetProposals();
+            // get block proposals
+            var blockProposals = this.GetProposals();
+
+            // for each block proposal get the local proposal, if there isn't one, add it.
+            foreach (var blockProposal in blockProposals)
+            {
+                var existingProposal = await this.Context.Set<BlockchainProposal>().FirstOrDefaultAsync(x => x.Hash == blockProposal.Hash);
+                if (existingProposal == null)
+                    await this.Add(blockProposal?.ToEntity());
+            }
+            await this.SaveAll();
+        }
+
+        private static DateTime? ToTime(JObject responseJObject)
+        {
+            var resultKey = responseJObject.SelectToken("result");
+            var timeKey = resultKey.SelectToken("time");
+            var time = JsonConvert.DeserializeObject(timeKey?.ToString());
+            var result = Convert.ToDouble(time);
+
+            DateTime dateTime = new DateTime(1970, 1, 1, 0, 0, 0, 0, System.DateTimeKind.Utc);
+            dateTime = dateTime.AddSeconds(result).ToLocalTime();
+            return dateTime;
+        }
+
+        private JObject CreateRequestJson(string command, object[] parameters)
+        {
+            JObject jObject = new JObject();
+            jObject["jsonrpc"] = "1.0";
+            jObject["id"] = "1";
+            jObject["method"] = command;
+
+            if (parameters != null)
+            {
+                if (parameters.Length > 0)
+                {
+                    JArray props = new JArray();
+                    foreach (var p in parameters)
+                    {
+                        props.Add(p);
+                    }
+                    jObject.Add(new JProperty("params", props));
+                }
+            }
+            return jObject;
+        }
+
+        public int GetValidCount()
+        {
+            var proposals = this.GetProposals();
             if (proposals == null)
                 return -1;
 
@@ -168,20 +194,19 @@ namespace ZestMonitor.Api.Repositories
             return result;
         }
 
-        public async Task<int> GetFundedCount()
+        public int GetFundedCount()
         {
-            var proposals = await this.GetProposals();
+            var proposals = this.GetProposals();
             if (proposals == null)
                 return -1;
 
             var result = proposals.Count(x => x.IsEstablished);
-
             return result;
         }
 
-        public async Task<ProposalMetadataModel> GetMetadata()
+        public ProposalMetadataModel GetMetadata()
         {
-            var proposals = await this.GetProposals();
+            var proposals = this.GetProposals();
             if (proposals == null)
                 return null;
 
@@ -194,7 +219,5 @@ namespace ZestMonitor.Api.Repositories
                 FundedProposalCount = fundedCount
             };
         }
-
-
     }
 }

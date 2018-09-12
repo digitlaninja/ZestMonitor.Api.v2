@@ -42,7 +42,6 @@ namespace ZestMonitor.Api.Data.Models
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize).ToList();
 
-
             return new PagedList<T>(items, count, pageNumber, pageSize);
         }
     }
