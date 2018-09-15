@@ -10,14 +10,15 @@ using ZestMonitor.Api.Extensions;
 using ZestMonitor.Api.Helpers;
 using ZestMonitor.Api.Services;
 
+// Mainly contains logic used by the Admin project
 namespace ZestMonitor.Api.Controllers
 {
-    [Route("api/[controller]")]
-    public class ProposalPaymentsController : ControllerBase
+    [Route("api/proposalpayments")]
+    public class ManualProposalPayments : ControllerBase
     {
         private ProposalPaymentsService ProposalPaymentsService { get; }
 
-        public ProposalPaymentsController(ProposalPaymentsService proposalPaymentsService)
+        public ManualProposalPayments(ProposalPaymentsService proposalPaymentsService)
         {
             if (proposalPaymentsService == null) throw new ArgumentNullException(nameof(proposalPaymentsService));
             this.ProposalPaymentsService = proposalPaymentsService;

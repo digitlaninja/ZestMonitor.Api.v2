@@ -10,9 +10,9 @@ using ZestMonitor.Api.Helpers;
 
 namespace ZestMonitor.Api.Repositories
 {
-    public class ProposalPaymentsRepository : Repository<ProposalPayments>, IProposalPaymentsRepository
+    public class ManualProposalPaymentsRepository : Repository<ProposalPayments>, IManualProposalPaymentsRepository
     {
-        public ProposalPaymentsRepository(ZestContext context) : base(context) { }
+        public ManualProposalPaymentsRepository(ZestContext context) : base(context) { }
 
         public async Task<PagedList<ProposalPayments>> GetPaged(PagingParams pagingParams)
         {

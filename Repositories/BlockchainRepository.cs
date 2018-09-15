@@ -23,22 +23,10 @@ namespace ZestMonitor.Api.Repositories
 
         private readonly string GetProposalsCommand = "{ \"jsonrpc\": \"1.0\", \"id\":\"getproposals\", \"m`ethod\": \"mnbudget\",\"params\":[\"show\"]}";
 
-        public async Task<List<BlockchainProposal>> GetLocalPagedBlockchainProposals()
-        {
-            return await this.GetAll().ToListAsync();
-        }
-
-        public List<BlockchainProposalJson> GetPagedProposals(PagingParams pagingParams)
-        {
-            var resultKey = this.ExecuteRPCCommand("mnbudget", new[] { "show" });
-            var result = JsonConvert.DeserializeObject<List<BlockchainProposalJson>>(resultKey?.ToString());
-            return result;
-        }
-
         public DateTime? GetTime(string hash)
         {
             var resultKey = this.ExecuteRPCCommand("getrawtransaction", new object[] { hash, 1 });
-            var timeKey = resultKey.SelectToken("time");
+            var timeKey = resultKey?.SelectToken("time");
             var result = this.ToDateTime(timeKey);
             return result;
         }
@@ -85,7 +73,7 @@ namespace ZestMonitor.Api.Repositories
             }
             catch (WebException we)
             {
-                throw;
+                return null;
             }
             WebResponse webResponse = null;
             try

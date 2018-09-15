@@ -12,8 +12,7 @@ namespace ZestMonitor.Api.Data.Abstract.Interfaces
     public interface IBlockchainRepository
     {
         List<BlockchainProposalJson> GetProposals();
-        List<BlockchainProposalJson> GetPagedProposals(PagingParams pagingParams);
-        Task<List<BlockchainProposal>> GetLocalPagedBlockchainProposals();
+
         BlockchainProposalJson GetProposal(string name);
         DateTime? GetTime(string hash);
         HttpWebRequest CreateRequest(string json);

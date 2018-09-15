@@ -11,6 +11,7 @@ namespace ZestMonitor.Api.Data.Contexts
 
         public DbSet<ProposalPayments> ProposalPayments { get; set; }
         public DbSet<User> Users { get; set; }
+        public DbSet<BlockchainProposal> BlockchainProposal { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {

@@ -24,15 +24,14 @@ namespace ZestMonitor.Api.Controllers
             var result = await this.BlockchainService.GetPagedProposals(pagingParams);
             if (result == null)
                 return BadRequest();
-
             Response.AddPagination(result.CurrentPage, result.PageSize, result.TotalCount, result.TotalPages);
             return Ok(result);
         }
 
         [HttpGet("{name:proposalname}")]
-        public async Task<IActionResult> GetBlockchainProposal([FromRoute]string name)
+        public IActionResult GetBlockchainProposal([FromRoute]string name)
         {
-            var result = await this.BlockchainService.GetProposal(name);
+            var result = this.BlockchainService.GetLocalProposal(name);
             if (result == null)
                 return BadRequest();
 
@@ -40,9 +39,9 @@ namespace ZestMonitor.Api.Controllers
         }
 
         [HttpGet("metadata")]
-        public async Task<IActionResult> GetProposalMetadata()
+        public IActionResult GetProposalMetadata()
         {
-            var result = await this.BlockchainService.GetProposalMetadata();
+            var result = this.BlockchainService.GetProposalMetadata();
             if (result == null)
                 return BadRequest();
 

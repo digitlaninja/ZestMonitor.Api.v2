@@ -8,6 +8,7 @@ namespace ZestMonitor.Api.Data.Maps
     {
         public void Configure(EntityTypeBuilder<BlockchainProposal> builder)
         {
+            builder.ToTable("blockchainproposals");
             builder.HasKey(x => x.Id);
             builder.Property(x => x.Name).IsRequired();
             builder.Property(x => x.Url);

@@ -17,84 +17,85 @@ namespace ZestMonitor.Api.Services
     {
         public ILogger<BlockchainService> Logger { get; }
         public IBlockchainRepository BlockchainRepository { get; }
+        public ILocalBlockchainRepository LocalBlockchainRepository { get; }
         public ProposalPaymentsService ProposalPaymentsService { get; }
 
-        public BlockchainService(ILogger<BlockchainService> logger, IBlockchainRepository BlockchainRepository, ProposalPaymentsService proposalPaymentsService)
+        public BlockchainService(ILogger<BlockchainService> logger, IBlockchainRepository BlockchainRepository, ProposalPaymentsService proposalPaymentsService, ILocalBlockchainRepository localBlockchainRepository)
         {
             this.Logger = logger ?? throw new System.ArgumentNullException(nameof(logger));
             this.BlockchainRepository = BlockchainRepository ?? throw new ArgumentNullException(nameof(BlockchainRepository));
             this.ProposalPaymentsService = proposalPaymentsService ?? throw new ArgumentNullException(nameof(proposalPaymentsService));
+            this.LocalBlockchainRepository = localBlockchainRepository ?? throw new ArgumentNullException(nameof(localBlockchainRepository));
         }
 
         public async Task<PagedList<BlockchainProposalModel>> GetPagedProposals(PagingParams pagingParams)
         {
             var viewModel = new List<BlockchainProposalModel>();
-            var blockchainProposals = await this.BlockchainRepository.GetLocalPagedBlockchainProposals();
+            var blockchainProposals = await this.LocalBlockchainRepository.GetProposals();
             var localProposals = await this.ProposalPaymentsService.GetAll();
-            var t = await this.ConstructCompleteleProposalData(pagingParams);
+            var result = await this.CreateBlockchainProposalPagedList(pagingParams, blockchainProposals, localProposals);
 
+            if (result.Count <= 0 || result == null)
+                return null;
+
+            return result;
+        }
+
+        public async Task<BlockchainProposal> GetLocalProposal(string name)
+        {
+            if (string.IsNullOrEmpty(name))
+                return null;
+
+            return await this.LocalBlockchainRepository.GetProposal(name);
+        }
+
+        public int GetValidCount() => this.BlockchainRepository.GetValidCount();
+
+        public int GetFundedCount() => this.BlockchainRepository.GetFundedCount();
+
+        public ProposalMetadataModel GetProposalMetadata() => this.BlockchainRepository.GetMetadata();
+
+        public async Task<PagedList<BlockchainProposalModel>> CreateBlockchainProposalPagedList(PagingParams pagingParams, IEnumerable<BlockchainProposal> blockchainProposals, IEnumerable<ProposalPaymentsModel> localProposals)
+        {
+            if (pagingParams == null || blockchainProposals == null || localProposals == null)
+                return null;
+
+            var viewModel = new List<BlockchainProposalModel>();
             foreach (var blockchainProposal in blockchainProposals)
             {
-                var model = new BlockchainProposalModel();
-                var matchingProposal = localProposals
-                                        .OrderByDescending(x => x.DateCreated)
-                                        .FirstOrDefault(x => x.Hash == blockchainProposal.Hash);
-
-                if (matchingProposal != null)
-                    model.Amount = matchingProposal.Amount;
-
-                model.Name = blockchainProposal.Name;
-                model.Url = blockchainProposal.Url;
-                model.Hash = blockchainProposal.Hash;
-                model.FeeHash = blockchainProposal.FeeHash;
-                model.Yeas = blockchainProposal.Yeas;
-                model.Nays = blockchainProposal.Nays;
-                model.Abstains = blockchainProposal.Abstains;
-                model.Ratio = Math.Round(blockchainProposal.Ratio, 2);
-                model.IsEstablished = blockchainProposal.IsEstablished ? "Yes" : "No";
-                model.IsValid = blockchainProposal.IsValid ? "Yes" : "No";
-                model.IsValidReason = blockchainProposal.IsValidReason;
-                model.FValid = blockchainProposal.FValid ? "Yes" : "No";
-
+                var model = this.CreateBlockchainProposalModel(localProposals, blockchainProposal);
                 viewModel.Add(model);
             }
+
             var pagedProposals = PagedList<BlockchainProposalModel>.CreateAsync(viewModel, pagingParams.PageNumber, pagingParams.PageSize);
             return pagedProposals;
         }
 
-        public async Task<PagedList<BlockchainProposalModel>> ConstructCompleteleProposalData(PagingParams pagingParams)
+        private BlockchainProposalModel CreateBlockchainProposalModel(IEnumerable<ProposalPaymentsModel> localProposals, BlockchainProposal blockchainProposal)
         {
-            var viewModel = new List<BlockchainProposalModel>();
-            var blockchainProposals = this.BlockchainRepository.GetPagedProposals(pagingParams);
-            var localProposals = await this.ProposalPaymentsService.GetAll();
+            if (localProposals == null || blockchainProposal == null)
+                return null;
 
-            foreach (var blockchainProposal in blockchainProposals)
-            {
-                var model = new BlockchainProposalModel();
-                var matchingProposal = localProposals.OrderByDescending(x => x.DateCreated).FirstOrDefault(x => x.Hash == blockchainProposal.Hash);
+            var model = new BlockchainProposalModel();
+            var blockLocalProposalMatch = localProposals.OrderByDescending(x => x.DateCreated).FirstOrDefault(x => x.Hash == blockchainProposal.Hash);
 
-                if (matchingProposal != null)
-                    model.Amount = matchingProposal.Amount;
+            if (blockLocalProposalMatch != null)
+                model.Amount = blockLocalProposalMatch.Amount;
 
-                model.Time = this.BlockchainRepository.GetTime(blockchainProposal.Hash);
-                model.Name = blockchainProposal.Name;
-                model.Url = blockchainProposal.Url;
-                model.Hash = blockchainProposal.Hash;
-                model.FeeHash = blockchainProposal.FeeHash;
-                model.Yeas = blockchainProposal.Yeas;
-                model.Nays = blockchainProposal.Nays;
-                model.Abstains = blockchainProposal.Abstains;
-                model.Ratio = Math.Round(blockchainProposal.Ratio, 2);
-                model.IsEstablished = blockchainProposal.IsEstablished ? "Yes" : "No";
-                model.IsValid = blockchainProposal.IsValid ? "Yes" : "No";
-                model.IsValidReason = blockchainProposal.IsValidReason;
-                model.FValid = blockchainProposal.FValid ? "Yes" : "No";
-
-                viewModel.Add(model);
-            }
-            var pagedProposals = PagedList<BlockchainProposalModel>.CreateAsync(viewModel, pagingParams.PageNumber, pagingParams.PageSize);
-            return pagedProposals;
-
+            model.Time = !string.IsNullOrEmpty(blockchainProposal.FeeHash) ? this.BlockchainRepository.GetTime(blockchainProposal.FeeHash) : null;
+            model.Name = blockchainProposal.Name;
+            model.Url = blockchainProposal.Url;
+            model.Hash = blockchainProposal.Hash;
+            model.FeeHash = blockchainProposal.FeeHash;
+            model.Yeas = blockchainProposal.Yeas;
+            model.Nays = blockchainProposal.Nays;
+            model.Abstains = blockchainProposal.Abstains;
+            model.Ratio = Math.Round(blockchainProposal.Ratio, 2);
+            model.IsEstablished = blockchainProposal.IsEstablished ? "Yes" : "No";
+            model.IsValid = blockchainProposal.IsValid ? "Yes" : "No";
+            model.IsValidReason = blockchainProposal.IsValidReason;
+            model.FValid = blockchainProposal.FValid ? "Yes" : "No";
+            return model;
         }
 
         private static DateTime? ToTime(JObject responseJObject)
@@ -107,29 +108,6 @@ namespace ZestMonitor.Api.Services
             DateTime dateTime = new DateTime(1970, 1, 1, 0, 0, 0, 0, System.DateTimeKind.Utc);
             dateTime = dateTime.AddSeconds(result).ToLocalTime();
             return dateTime;
-        }
-
-        public BlockchainProposalJson GetProposal(string name)
-        {
-            if (string.IsNullOrEmpty(name))
-                return null;
-
-            return this.BlockchainRepository.GetProposal(name);
-        }
-
-        public int GetValidCount()
-        {
-            return this.BlockchainRepository.GetValidCount();
-        }
-
-        public int GetFundedCount()
-        {
-            return this.BlockchainRepository.GetFundedCount();
-        }
-
-        public ProposalMetadataModel GetProposalMetadata()
-        {
-            return this.BlockchainRepository.GetMetadata();
         }
     }
 }
