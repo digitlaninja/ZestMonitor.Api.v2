@@ -23,7 +23,7 @@ namespace ZestMonitor.Api.Controllers
         public async Task<IActionResult> Register([FromBody] UserRegistrationModel user)
         {
             if (!ModelState.IsValid)
-                return BadRequest(ModelState.Values);
+                return BadRequest(ModelState);
 
             user.Username = user.Username.ToLower();
 
@@ -34,26 +34,23 @@ namespace ZestMonitor.Api.Controllers
             if (!userRegistered)
                 return StatusCode((int)HttpStatusCode.ServiceUnavailable);
 
-            var body = new { Data = user.Username };
-            // return CreatedAtRoute(new Uri($"{Request.Path}", UriKind.Relative), body);
-
+            var body = new { result = user.Username };
             return CreatedAtRoute("register", body);
         }
-        
+
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] UserLoginModel model)
         {
-            if(!ModelState.IsValid)
-                return BadRequest(ModelState.Values);
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
 
-                var validUser = await this.AuthService.Login(model);
+            var validUser = await this.AuthService.Login(model);
+            // dont show user not found or any messages with hints, simply unath
+            if (validUser == null)
+                return Unauthorized();
 
-                // dont show user not found or any messages with hints, simply unath
-                if(validUser == null)
-                    return Unauthorized();
-
-                var accessToken = this.AuthService.CreateJwtAccessToken(validUser);
-                return Ok(new {token = accessToken});
+            var accessToken = this.AuthService.CreateJwtAccessToken(validUser);
+            return Ok(new { token = accessToken });
         }
     }
 }

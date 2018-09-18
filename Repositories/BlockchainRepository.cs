@@ -26,14 +26,23 @@ namespace ZestMonitor.Api.Repositories
         public DateTime? GetTime(string hash)
         {
             var resultKey = this.ExecuteRPCCommand("getrawtransaction", new object[] { hash, 1 });
-            var timeKey = resultKey?.SelectToken("time");
+            if (resultKey == null)
+                return null;
+
+            var timeKey = resultKey.SelectToken("time");
+            if (timeKey == null)
+                return null;
+
             var result = this.ToDateTime(timeKey);
             return result;
         }
 
         private DateTime? ToDateTime(JToken timeKey)
         {
-            var time = JsonConvert.DeserializeObject(timeKey?.ToString());
+            if (timeKey == null)
+                return null;
+
+            var time = JsonConvert.DeserializeObject(timeKey.ToString());
             var result = Convert.ToDouble(time);
 
             DateTime dateTime = new DateTime(1970, 1, 1, 0, 0, 0, 0, System.DateTimeKind.Utc);
@@ -41,10 +50,10 @@ namespace ZestMonitor.Api.Repositories
             return dateTime;
         }
 
-        public List<BlockchainProposalJson> GetProposals()
+        public IEnumerable<BlockchainProposalJson> GetProposals()
         {
             var resultKey = this.ExecuteRPCCommand("mnbudget", new[] { "show" });
-            var result = JsonConvert.DeserializeObject<List<BlockchainProposalJson>>(resultKey?.ToString());
+            var result = JsonConvert.DeserializeObject<IEnumerable<BlockchainProposalJson>>(resultKey?.ToString());
             return result;
         }
 
@@ -64,6 +73,7 @@ namespace ZestMonitor.Api.Repositories
             // serialize json for the request
             byte[] byteArray = Encoding.UTF8.GetBytes(s);
             request.ContentLength = byteArray.Length;
+
             try
             {
                 using (Stream dataStream = request.GetRequestStream())
@@ -75,6 +85,7 @@ namespace ZestMonitor.Api.Repositories
             {
                 return null;
             }
+
             WebResponse webResponse = null;
             try
             {
@@ -123,21 +134,6 @@ namespace ZestMonitor.Api.Repositories
             return request;
         }
 
-        public async Task SaveProposals()
-        {
-            // get block proposals
-            var blockProposals = this.GetProposals();
-
-            // for each block proposal get the local proposal, if there isn't one, add it.
-            foreach (var blockProposal in blockProposals)
-            {
-                var existingProposal = await this.Context.Set<BlockchainProposal>().FirstOrDefaultAsync(x => x.Hash == blockProposal.Hash);
-                if (existingProposal == null)
-                    await this.Add(blockProposal?.ToEntity());
-            }
-            await this.SaveAll();
-        }
-
         private static DateTime? ToTime(JObject responseJObject)
         {
             var resultKey = responseJObject.SelectToken("result");
@@ -170,42 +166,6 @@ namespace ZestMonitor.Api.Repositories
                 }
             }
             return jObject;
-        }
-
-        public int GetValidCount()
-        {
-            var proposals = this.GetProposals();
-            if (proposals == null)
-                return -1;
-
-            var result = proposals.Count(x => x.IsValid);
-            return result;
-        }
-
-        public int GetFundedCount()
-        {
-            var proposals = this.GetProposals();
-            if (proposals == null)
-                return -1;
-
-            var result = proposals.Count(x => x.IsEstablished);
-            return result;
-        }
-
-        public ProposalMetadataModel GetMetadata()
-        {
-            var proposals = this.GetProposals();
-            if (proposals == null)
-                return null;
-
-            var validCount = proposals.Count(x => x.IsValid);
-            var fundedCount = proposals.Count(x => x.IsEstablished);
-
-            return new ProposalMetadataModel()
-            {
-                ValidProposalCount = validCount,
-                FundedProposalCount = fundedCount
-            };
         }
     }
 }

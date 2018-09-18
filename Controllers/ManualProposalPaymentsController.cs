@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ZestMonitor.Api.Data.Abstract.Interfaces;
@@ -13,21 +14,21 @@ using ZestMonitor.Api.Services;
 // Mainly contains logic used by the Admin project
 namespace ZestMonitor.Api.Controllers
 {
+    [Authorize]
     [Route("api/proposalpayments")]
-    public class ManualProposalPayments : ControllerBase
+    public class ManualProposalPaymentsController : ControllerBase
     {
-        private ProposalPaymentsService ProposalPaymentsService { get; }
+        private ManualProposalPaymentsService ManualProposalPaymentsService { get; }
 
-        public ManualProposalPayments(ProposalPaymentsService proposalPaymentsService)
+        public ManualProposalPaymentsController(ManualProposalPaymentsService proposalPaymentsService)
         {
-            if (proposalPaymentsService == null) throw new ArgumentNullException(nameof(proposalPaymentsService));
-            this.ProposalPaymentsService = proposalPaymentsService;
+            this.ManualProposalPaymentsService = proposalPaymentsService ?? throw new ArgumentNullException(nameof(proposalPaymentsService));
         }
 
         [HttpGet]
         public async Task<IActionResult> GetProposalPayments([FromQuery] PagingParams pagingParams)
         {
-            var result = await this.ProposalPaymentsService.GetPaged(pagingParams);
+            var result = await this.ManualProposalPaymentsService.GetPaged(pagingParams);
             if (result == null)
                 return NotFound();
 
@@ -41,7 +42,7 @@ namespace ZestMonitor.Api.Controllers
             if (string.IsNullOrEmpty(hash))
                 return BadRequest();
 
-            var result = await this.ProposalPaymentsService.Get(hash);
+            var result = await this.ManualProposalPaymentsService.Get(hash);
             if (result == null)
                 return NotFound();
 
@@ -54,7 +55,7 @@ namespace ZestMonitor.Api.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var created = await this.ProposalPaymentsService.Create(model);
+            var created = await this.ManualProposalPaymentsService.Create(model);
             if (!created)
                 return BadRequest();
 
@@ -67,7 +68,7 @@ namespace ZestMonitor.Api.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var deleted = await this.ProposalPaymentsService.Delete(hash);
+            var deleted = await this.ManualProposalPaymentsService.Delete(hash);
             if (!deleted)
                 return BadRequest();
 

@@ -11,17 +11,18 @@ namespace ZestMonitor.Api.Controllers
     [Route("api/[controller]")]
     public class BlockchainProposalsController : ControllerBase
     {
+        private LocalBlockchainService LocalBlockchainService { get; }
         private BlockchainService BlockchainService { get; }
 
-        public BlockchainProposalsController(BlockchainService blockchainService)
+        public BlockchainProposalsController(LocalBlockchainService localBlockchainService, BlockchainService blockchainService)
         {
-            this.BlockchainService = blockchainService ?? throw new ArgumentNullException(nameof(blockchainService));
+            this.LocalBlockchainService = localBlockchainService ?? throw new ArgumentNullException(nameof(localBlockchainService));
         }
 
         [HttpGet]
         public async Task<IActionResult> GetBlockchainProposals([FromQuery] PagingParams pagingParams)
         {
-            var result = await this.BlockchainService.GetPagedProposals(pagingParams);
+            var result = await this.LocalBlockchainService.GetPagedProposals(pagingParams);
             if (result == null)
                 return BadRequest();
             Response.AddPagination(result.CurrentPage, result.PageSize, result.TotalCount, result.TotalPages);
@@ -29,9 +30,9 @@ namespace ZestMonitor.Api.Controllers
         }
 
         [HttpGet("{name:proposalname}")]
-        public IActionResult GetBlockchainProposal([FromRoute]string name)
+        public async Task<IActionResult> GetBlockchainProposal([FromRoute]string name)
         {
-            var result = this.BlockchainService.GetLocalProposal(name);
+            var result = await this.LocalBlockchainService.GetLocalProposal(name);
             if (result == null)
                 return BadRequest();
 
@@ -39,13 +40,20 @@ namespace ZestMonitor.Api.Controllers
         }
 
         [HttpGet("metadata")]
-        public IActionResult GetProposalMetadata()
+        public async Task<IActionResult> GetProposalMetadata()
         {
-            var result = this.BlockchainService.GetProposalMetadata();
+            var result = await this.LocalBlockchainService.GetProposalMetadata();
             if (result == null)
                 return BadRequest();
 
             return Ok(result);
         }
+
+        // [HttpPost]
+        // public async Task<IActionResult> SaveProposals()
+        // {
+        //     await this.BlockchainService.SaveProposals();
+        //     return Ok();
+        // }
     }
 }

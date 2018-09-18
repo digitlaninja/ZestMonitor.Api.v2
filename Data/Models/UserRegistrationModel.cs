@@ -3,7 +3,6 @@ using ZestMonitor.Api.Validation;
 
 namespace ZestMonitor.Api.Data.Models
 {
-
     [Validator(typeof(UserRegistrationValidator))]
     public class UserRegistrationModel
     {

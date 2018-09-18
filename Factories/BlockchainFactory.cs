@@ -43,5 +43,43 @@ namespace ZestMonitor.Api.Factories
             };
             return entity;
         }
+
+
+        public static IEnumerable<BlockchainProposalModel> ToModels(this IEnumerable<BlockchainProposal> entities)
+        {
+            if (entities == null)
+                throw new System.ArgumentNullException(nameof(entities));
+
+            var models = new List<BlockchainProposalModel>();
+            foreach (var entity in entities)
+            {
+                models.Add(entity.ToModel());
+            }
+            return models;
+        }
+
+
+        public static BlockchainProposalModel ToModel(this BlockchainProposal entity)
+        {
+            if (entity == null)
+                throw new System.ArgumentNullException(nameof(entity));
+
+            var model = new BlockchainProposalModel()
+            {
+                Name = entity.Name,
+                Url = entity.Url,
+                Hash = entity.Hash,
+                FeeHash = entity.FeeHash,
+                Yeas = entity.Yeas,
+                Nays = entity.Nays,
+                Abstains = entity.Abstains,
+                IsEstablished = entity.IsEstablished ? "Yes" : "No",
+                IsValid = entity.IsValid ? "Yes" : "No",
+                IsValidReason = entity.IsValidReason,
+                FValid = entity.FValid ? "Yes" : "No",
+                Ratio = entity.Ratio
+            };
+            return model;
+        }
     }
 }

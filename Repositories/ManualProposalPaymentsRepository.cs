@@ -9,7 +9,7 @@ using ZestMonitor.Api.Data.Models;
 using ZestMonitor.Api.Helpers;
 
 namespace ZestMonitor.Api.Repositories
-{
+{   // Deals with Manually entered Proposals payments from CMS
     public class ManualProposalPaymentsRepository : Repository<ProposalPayments>, IManualProposalPaymentsRepository
     {
         public ManualProposalPaymentsRepository(ZestContext context) : base(context) { }

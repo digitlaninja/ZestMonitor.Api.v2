@@ -11,14 +11,9 @@ namespace ZestMonitor.Api.Data.Abstract.Interfaces
 {
     public interface IBlockchainRepository
     {
-        List<BlockchainProposalJson> GetProposals();
-
+        IEnumerable<BlockchainProposalJson> GetProposals();
         BlockchainProposalJson GetProposal(string name);
         DateTime? GetTime(string hash);
         HttpWebRequest CreateRequest(string json);
-        int GetValidCount();
-        int GetFundedCount();
-        ProposalMetadataModel GetMetadata();
-        Task SaveProposals();
     }
 }

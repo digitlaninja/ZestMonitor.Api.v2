@@ -9,46 +9,51 @@ using ZestMonitor.Api.Data.Models;
 
 namespace ZestMonitor.Api.Repositories
 {
+    // Deals with Locally Saved Proposals from the Blockchain
     public class LocalBlockchainRepository : Repository<BlockchainProposal>, ILocalBlockchainRepository
     {
         public LocalBlockchainRepository(ZestContext context) : base(context)
         {
         }
-        public async Task<List<BlockchainProposal>> GetProposals() => await this.GetAll().ToListAsync();
+        public async Task<List<BlockchainProposal>> GetProposals() => await this.GetAll()?.ToListAsync();
 
         public async Task<BlockchainProposal> GetProposal(string name)
         {
             if (string.IsNullOrEmpty(name))
                 return null;
-            var result = await this.GetAll().FirstOrDefaultAsync(x => x.Name == name);
+            var result = await this.GetAll()?.FirstOrDefaultAsync(x => x.Name == name);
             return result;
         }
 
         // (yeas / nay) * 100 = % yeas
         public async Task<int> GetValidCount()
         {
-            var proposals = await this.GetAll().ToListAsync();
+            var proposals = this.GetAll();
             if (proposals == null)
                 return -1;
 
-            var result = proposals.Count(x => x.IsValid);
+            var result = await proposals.CountAsync(x => x.IsValid);
             return result;
         }
 
         public async Task<int> GetFundedCount()
         {
-            var proposals = await this.GetAll().ToListAsync();
+            var proposals = this.GetAll();
             if (proposals == null)
                 return -1;
 
-            var result = proposals.Count(x => x.IsEstablished);
+            var result = await proposals.CountAsync(x => x.IsEstablished);
             return result;
         }
 
         public async Task<ProposalMetadataModel> GetMetadata()
         {
-            var validCount = await this.GetValidCount();
-            var fundedCount = await this.GetFundedCount();
+            var proposals = await this.GetProposals();
+            if (proposals == null)
+                return null;
+
+            var validCount = proposals.Count(x => x.IsValid);
+            var fundedCount = proposals.Count(x => x.IsEstablished);
 
             return new ProposalMetadataModel()
             {
@@ -56,5 +61,6 @@ namespace ZestMonitor.Api.Repositories
                 FundedProposalCount = fundedCount
             };
         }
+
     }
 }

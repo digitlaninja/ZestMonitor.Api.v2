@@ -16,7 +16,7 @@ public static class ProposalPaymentsFactory
             ShortDescription = entity.ShortDescription,
             Amount = entity.Amount,
             ExpectedPayment = entity.ExpectedPayment,
-            DateCreated = entity.CreatedAt.ToLocalTime().ToString("yyyy/MM/dd/HH")	
+            CreatedAt = entity.CreatedAt.ToLocalTime().ToString("yyyy/MM/dd/HH")
         };
     }
 
@@ -26,12 +26,22 @@ public static class ProposalPaymentsFactory
             throw new System.ArgumentNullException(nameof(entities));
 
         List<ProposalPaymentsModel> model = new List<ProposalPaymentsModel>();
-
         foreach (var entity in entities)
         {
             model.Add(entity.ToModel());
         }
+        return model;
+    }
 
+    public static IEnumerable<ProposalPaymentsModel> ToModel(this List<ProposalPayments> entities)
+    {
+        if (entities == null)
+            throw new System.ArgumentNullException(nameof(entities));
+        List<ProposalPaymentsModel> model = new List<ProposalPaymentsModel>();
+        foreach (var entity in entities)
+        {
+            model.Add(entity.ToModel());
+        }
         return model;
     }
 

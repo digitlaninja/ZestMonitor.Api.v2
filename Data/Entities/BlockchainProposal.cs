@@ -1,3 +1,4 @@
+using System;
 using Newtonsoft.Json;
 
 namespace ZestMonitor.Api.Data.Entities
@@ -16,5 +17,6 @@ namespace ZestMonitor.Api.Data.Entities
         public string IsValidReason { get; set; }
         public bool FValid { get; set; }
         public double Ratio { get; internal set; }
+        public DateTime? Time { get; internal set; }
     }
 }

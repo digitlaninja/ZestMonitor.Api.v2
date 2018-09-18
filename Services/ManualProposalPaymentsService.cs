@@ -19,23 +19,23 @@ using ZestMonitor.Api.Helpers;
 
 namespace ZestMonitor.Api.Services
 {
-    public class ProposalPaymentsService
+    public class ManualProposalPaymentsService
     {
         private IManualProposalPaymentsRepository ManualProposalPaymentsRepository { get; }
-        public ILogger<ProposalPaymentsService> Logger { get; }
-        public IBlockchainRepository BlockchainRepository { get; }
+        public ILogger<ManualProposalPaymentsService> Logger { get; }
+        public ILocalBlockchainRepository LocalBlockchainRepository { get; }
 
-        public ProposalPaymentsService(IManualProposalPaymentsRepository proposalPaymentsRepository, ILogger<ProposalPaymentsService> logger, IBlockchainRepository BlockchainRepository)
+        public ManualProposalPaymentsService(IManualProposalPaymentsRepository manualProposalPaymentsRepository, ILogger<ManualProposalPaymentsService> logger, ILocalBlockchainRepository localBlockchainRepository)
         {
-            this.ManualProposalPaymentsRepository = proposalPaymentsRepository ?? throw new ArgumentNullException(nameof(proposalPaymentsRepository)); ;
+            this.ManualProposalPaymentsRepository = manualProposalPaymentsRepository ?? throw new ArgumentNullException(nameof(manualProposalPaymentsRepository)); ;
             this.Logger = logger ?? throw new ArgumentNullException(nameof(logger));
-            this.BlockchainRepository = BlockchainRepository ?? throw new ArgumentNullException(nameof(BlockchainRepository));
+            this.LocalBlockchainRepository = localBlockchainRepository ?? throw new ArgumentNullException(nameof(LocalBlockchainRepository));
         }
 
-        public async Task<IEnumerable<ProposalPaymentsModel>> GetAll()
+        public async Task<IEnumerable<ProposalPayments>> GetAll()
         {
             var proposals = await this.ManualProposalPaymentsRepository.GetAll()?.ToListAsync();
-            return proposals?.ToModel();
+            return proposals;
         }
 
         public async Task<PagedList<ProposalPaymentsModel>> GetPaged(PagingParams pagingParams)
@@ -58,8 +58,7 @@ namespace ZestMonitor.Api.Services
         public async Task<bool> Create(ProposalPaymentsModel model)
         {
             if (model == null)
-                throw new ArgumentNullException(nameof(model));
-
+                return false;
 
             var entity = model.ToEntity();
             entity.CreatedAt = DateTime.Now;
@@ -77,9 +76,11 @@ namespace ZestMonitor.Api.Services
             if (string.IsNullOrEmpty(hash))
                 throw new ArgumentException("message", nameof(hash));
 
-            var entities = this.ManualProposalPaymentsRepository.GetAll();
-            var entity = await entities.FirstOrDefaultAsync(x => x.Hash == hash);
-            this.ManualProposalPaymentsRepository.Remove(entity);
+            var entities = await this.ManualProposalPaymentsRepository.GetAll()
+                                                                    .Where(x => x.Hash == hash)
+                                                                    .ToListAsync();
+            entities.ForEach(x => this.ManualProposalPaymentsRepository.Remove(x));
+
 
             var result = await this.ManualProposalPaymentsRepository.SaveAll();
             if (!result)

@@ -9,95 +9,79 @@ using Newtonsoft.Json.Linq;
 using ZestMonitor.Api.Data.Abstract.Interfaces;
 using ZestMonitor.Api.Data.Entities;
 using ZestMonitor.Api.Data.Models;
+using ZestMonitor.Api.Factories;
 using ZestMonitor.Api.Helpers;
 
 namespace ZestMonitor.Api.Services
 {
+    // Deals directly with the Blockchain
     public class BlockchainService
     {
+        private IManualProposalPaymentsRepository ManualProposalPaymentsRepository { get; }
         public ILogger<BlockchainService> Logger { get; }
         public IBlockchainRepository BlockchainRepository { get; }
         public ILocalBlockchainRepository LocalBlockchainRepository { get; }
-        public ProposalPaymentsService ProposalPaymentsService { get; }
+        public ManualProposalPaymentsService ProposalPaymentsService { get; }
 
-        public BlockchainService(ILogger<BlockchainService> logger, IBlockchainRepository BlockchainRepository, ProposalPaymentsService proposalPaymentsService, ILocalBlockchainRepository localBlockchainRepository)
+        public BlockchainService(ILogger<BlockchainService> logger, IBlockchainRepository BlockchainRepository, ManualProposalPaymentsService proposalPaymentsService, ILocalBlockchainRepository localBlockchainRepository, IManualProposalPaymentsRepository manualProposalPaymentsRepository)
         {
             this.Logger = logger ?? throw new System.ArgumentNullException(nameof(logger));
             this.BlockchainRepository = BlockchainRepository ?? throw new ArgumentNullException(nameof(BlockchainRepository));
             this.ProposalPaymentsService = proposalPaymentsService ?? throw new ArgumentNullException(nameof(proposalPaymentsService));
+            this.ManualProposalPaymentsRepository = manualProposalPaymentsRepository ?? throw new ArgumentNullException(nameof(manualProposalPaymentsRepository));
             this.LocalBlockchainRepository = localBlockchainRepository ?? throw new ArgumentNullException(nameof(localBlockchainRepository));
         }
 
-        public async Task<PagedList<BlockchainProposalModel>> GetPagedProposals(PagingParams pagingParams)
-        {
-            var viewModel = new List<BlockchainProposalModel>();
-            var blockchainProposals = await this.LocalBlockchainRepository.GetProposals();
-            var localProposals = await this.ProposalPaymentsService.GetAll();
-            var result = await this.CreateBlockchainProposalPagedList(pagingParams, blockchainProposals, localProposals);
-
-            if (result.Count <= 0 || result == null)
-                return null;
-
-            return result;
-        }
-
-        public async Task<BlockchainProposal> GetLocalProposal(string name)
-        {
-            if (string.IsNullOrEmpty(name))
-                return null;
-
-            return await this.LocalBlockchainRepository.GetProposal(name);
-        }
-
-        public int GetValidCount() => this.BlockchainRepository.GetValidCount();
-
-        public int GetFundedCount() => this.BlockchainRepository.GetFundedCount();
-
-        public ProposalMetadataModel GetProposalMetadata() => this.BlockchainRepository.GetMetadata();
-
-        public async Task<PagedList<BlockchainProposalModel>> CreateBlockchainProposalPagedList(PagingParams pagingParams, IEnumerable<BlockchainProposal> blockchainProposals, IEnumerable<ProposalPaymentsModel> localProposals)
-        {
-            if (pagingParams == null || blockchainProposals == null || localProposals == null)
-                return null;
-
-            var viewModel = new List<BlockchainProposalModel>();
-            foreach (var blockchainProposal in blockchainProposals)
-            {
-                var model = this.CreateBlockchainProposalModel(localProposals, blockchainProposal);
-                viewModel.Add(model);
-            }
-
-            var pagedProposals = PagedList<BlockchainProposalModel>.CreateAsync(viewModel, pagingParams.PageNumber, pagingParams.PageSize);
-            return pagedProposals;
-        }
-
-        private BlockchainProposalModel CreateBlockchainProposalModel(IEnumerable<ProposalPaymentsModel> localProposals, BlockchainProposal blockchainProposal)
+        // Builds a complete blockchain proposal with Time to store in the db
+        private BlockchainProposal ConstructFullBlockchainProposal(IEnumerable<ProposalPayments> localProposals, BlockchainProposal blockchainProposal)
         {
             if (localProposals == null || blockchainProposal == null)
                 return null;
 
-            var model = new BlockchainProposalModel();
-            var blockLocalProposalMatch = localProposals.OrderByDescending(x => x.DateCreated).FirstOrDefault(x => x.Hash == blockchainProposal.Hash);
+            var entity = new BlockchainProposal();
+            var blockLocalProposalMatch = localProposals.OrderByDescending(x => x.CreatedAt).FirstOrDefault(x => x.Hash == blockchainProposal.Hash);
 
-            if (blockLocalProposalMatch != null)
-                model.Amount = blockLocalProposalMatch.Amount;
-
-            model.Time = !string.IsNullOrEmpty(blockchainProposal.FeeHash) ? this.BlockchainRepository.GetTime(blockchainProposal.FeeHash) : null;
-            model.Name = blockchainProposal.Name;
-            model.Url = blockchainProposal.Url;
-            model.Hash = blockchainProposal.Hash;
-            model.FeeHash = blockchainProposal.FeeHash;
-            model.Yeas = blockchainProposal.Yeas;
-            model.Nays = blockchainProposal.Nays;
-            model.Abstains = blockchainProposal.Abstains;
-            model.Ratio = Math.Round(blockchainProposal.Ratio, 2);
-            model.IsEstablished = blockchainProposal.IsEstablished ? "Yes" : "No";
-            model.IsValid = blockchainProposal.IsValid ? "Yes" : "No";
-            model.IsValidReason = blockchainProposal.IsValidReason;
-            model.FValid = blockchainProposal.FValid ? "Yes" : "No";
-            return model;
+            entity.Time = !string.IsNullOrEmpty(blockchainProposal.FeeHash) ? this.BlockchainRepository.GetTime(blockchainProposal.FeeHash) : null;
+            entity.Name = blockchainProposal.Name;
+            entity.Url = blockchainProposal.Url;
+            entity.Hash = blockchainProposal.Hash;
+            entity.FeeHash = blockchainProposal.FeeHash;
+            entity.Yeas = blockchainProposal.Yeas;
+            entity.Nays = blockchainProposal.Nays;
+            entity.Abstains = blockchainProposal.Abstains;
+            entity.Ratio = Math.Round(blockchainProposal.Ratio, 2);
+            entity.IsEstablished = blockchainProposal.IsEstablished;
+            entity.IsValid = blockchainProposal.IsValid;
+            entity.IsValidReason = blockchainProposal.IsValidReason;
+            entity.FValid = blockchainProposal.FValid;
+            return entity;
         }
 
+        public async Task SaveProposals()
+        {
+            // get block proposals -> convert to entities
+            var proposalsFromBlockchain = this.BlockchainRepository.GetProposals();
+            if (proposalsFromBlockchain.Count() <= 0 || proposalsFromBlockchain == null)
+                return;
+
+            var blockchainProposals = proposalsFromBlockchain.ToEntities();
+            var localBlockchainProposals = await this.LocalBlockchainRepository.GetProposals();
+            var localManualProposals = await this.ProposalPaymentsService.GetAll();
+
+            foreach (var blockchainProposal in blockchainProposals)
+            {
+                var existingProposal = localBlockchainProposals.FirstOrDefault(x => x.Name == blockchainProposal.Name);
+
+                // Add only new proposals from the blockchain
+                if (existingProposal == null)
+                {
+                    // Create full blockchain proposal
+                    var completeBlockchainProposal = this.ConstructFullBlockchainProposal(localManualProposals, blockchainProposal);
+                    await this.LocalBlockchainRepository.Add(completeBlockchainProposal);
+                }
+            }
+            await this.LocalBlockchainRepository.SaveAll();
+        }
         private static DateTime? ToTime(JObject responseJObject)
         {
             var resultKey = responseJObject.SelectToken("result");

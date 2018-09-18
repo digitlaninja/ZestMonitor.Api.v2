@@ -54,6 +54,8 @@ namespace ZestMonitor.Api
             services.AddHangfire(config => config.UseStorage(new MySqlStorage(Configuration["ConnectionStrings:Default"])));
 
             services.AddScoped<Seed>();
+
+            services.RegisterZestDependancies();
             services.AddMvc().AddFluentValidation();
             services.Configure<RouteOptions>(options =>
             options.ConstraintMap.Add("proposalname", typeof(ProposalNameRouteConstraint)));
@@ -66,7 +68,7 @@ namespace ZestMonitor.Api
                                 .AllowCredentials());
             });
 
-            services.RegisterZestDependancies();
+
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(options =>
             {
@@ -81,14 +83,14 @@ namespace ZestMonitor.Api
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env, Seed seed, ILoggerFactory loggerFactory, IBlockchainRepository blockchainRepository)
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env, Seed seed, ILoggerFactory loggerFactory, BlockchainService blockchainService)
         {
             app.UseCustomExceptionHandler(this._logger);
-            app.UseHangfireServer();
-            app.UseHangfireDashboard();
+            // app.UseHangfireServer();
+            // app.UseHangfireDashboard();
 
             app.Map("/error", x => x.Run(y => throw new Exception()));
-            loggerFactory.AddProvider(new ConsoleLoggerProvider((category, logLevel) => logLevel >= LogLevel.Information, false));
+            loggerFactory.AddProvider(new ConsoleLoggerProvider((category, logLevel) => logLevel >= LogLevel.Critical, false));
             loggerFactory.AddConsole();
 
             this._logger = loggerFactory.CreateLogger<ConsoleLogger>();
@@ -105,16 +107,13 @@ namespace ZestMonitor.Api
                 // app.UseHsts();
             }
 
-
-            RecurringJob.AddOrUpdate(() => blockchainRepository.SaveProposals(), "*/5 * * * *");
-
+            // RecurringJob.AddOrUpdate(() => blockchainService.SaveProposals(), "* * * * *");
+            // RecurringJob.AddOrUpdate(() => blockchainService.SaveProposals(), "*/5 * * * *");
 
             app.UseCors("AllowAll");
-
             // Enforce Authentication configuration (jwt)
             app.UseAuthentication();
             // app.UseHttpsRedirection();
-
             app.UseMvc();
         }
     }
