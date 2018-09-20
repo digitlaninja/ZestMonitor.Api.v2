@@ -17,18 +17,18 @@ namespace ZestMonitor.Api.Services
     // Deals directly with the Blockchain
     public class BlockchainService
     {
-        private IManualProposalPaymentsRepository ManualProposalPaymentsRepository { get; }
+        private IProposalPaymentsRepository proposalPaymentsRepository { get; }
         public ILogger<BlockchainService> Logger { get; }
         public IBlockchainRepository BlockchainRepository { get; }
         public ILocalBlockchainRepository LocalBlockchainRepository { get; }
-        public ManualProposalPaymentsService ProposalPaymentsService { get; }
+        public ProposalPaymentsService ProposalPaymentsService { get; }
 
-        public BlockchainService(ILogger<BlockchainService> logger, IBlockchainRepository BlockchainRepository, ManualProposalPaymentsService proposalPaymentsService, ILocalBlockchainRepository localBlockchainRepository, IManualProposalPaymentsRepository manualProposalPaymentsRepository)
+        public BlockchainService(ILogger<BlockchainService> logger, IBlockchainRepository BlockchainRepository, ProposalPaymentsService proposalPaymentsService, ILocalBlockchainRepository localBlockchainRepository, IProposalPaymentsRepository proposalPaymentsRepository)
         {
             this.Logger = logger ?? throw new System.ArgumentNullException(nameof(logger));
             this.BlockchainRepository = BlockchainRepository ?? throw new ArgumentNullException(nameof(BlockchainRepository));
             this.ProposalPaymentsService = proposalPaymentsService ?? throw new ArgumentNullException(nameof(proposalPaymentsService));
-            this.ManualProposalPaymentsRepository = manualProposalPaymentsRepository ?? throw new ArgumentNullException(nameof(manualProposalPaymentsRepository));
+            this.proposalPaymentsRepository = proposalPaymentsRepository ?? throw new ArgumentNullException(nameof(proposalPaymentsRepository));
             this.LocalBlockchainRepository = localBlockchainRepository ?? throw new ArgumentNullException(nameof(localBlockchainRepository));
         }
 
@@ -66,7 +66,7 @@ namespace ZestMonitor.Api.Services
 
             var blockchainProposals = proposalsFromBlockchain.ToEntities();
             var localBlockchainProposals = await this.LocalBlockchainRepository.GetProposals();
-            var localManualProposals = await this.ProposalPaymentsService.GetAll();
+            var proposalPayments = await this.ProposalPaymentsService.GetAll();
 
             foreach (var blockchainProposal in blockchainProposals)
             {
@@ -76,7 +76,7 @@ namespace ZestMonitor.Api.Services
                 if (existingProposal == null)
                 {
                     // Create full blockchain proposal
-                    var completeBlockchainProposal = this.ConstructFullBlockchainProposal(localManualProposals, blockchainProposal);
+                    var completeBlockchainProposal = this.ConstructFullBlockchainProposal(proposalPayments, blockchainProposal);
                     await this.LocalBlockchainRepository.Add(completeBlockchainProposal);
                 }
             }

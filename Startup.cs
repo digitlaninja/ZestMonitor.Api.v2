@@ -52,12 +52,11 @@ namespace ZestMonitor.Api
         {
             services.AddDbContext<ZestContext>(x => x.UseMySql(Configuration["ConnectionStrings:Default"]));
             services.AddHangfire(config => config.UseStorage(new MySqlStorage(Configuration["ConnectionStrings:Default"])));
-
             services.AddScoped<Seed>();
-
             services.RegisterZestDependancies();
             services.AddMvc().AddFluentValidation();
             services.Configure<RouteOptions>(options =>
+
             options.ConstraintMap.Add("proposalname", typeof(ProposalNameRouteConstraint)));
             services.AddCors(options =>
             {
@@ -67,7 +66,6 @@ namespace ZestMonitor.Api
                                 .AllowAnyMethod()
                                 .AllowCredentials());
             });
-
 
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(options =>
@@ -87,7 +85,7 @@ namespace ZestMonitor.Api
         {
             app.UseCustomExceptionHandler(this._logger);
             // app.UseHangfireServer();
-            // app.UseHangfireDashboard();
+            app.UseHangfireDashboard();
 
             app.Map("/error", x => x.Run(y => throw new Exception()));
             loggerFactory.AddProvider(new ConsoleLoggerProvider((category, logLevel) => logLevel >= LogLevel.Critical, false));
@@ -108,7 +106,7 @@ namespace ZestMonitor.Api
             }
 
             // RecurringJob.AddOrUpdate(() => blockchainService.SaveProposals(), "* * * * *");
-            // RecurringJob.AddOrUpdate(() => blockchainService.SaveProposals(), "*/5 * * * *");
+            RecurringJob.AddOrUpdate(() => blockchainService.SaveProposals(), "*/5 * * * *");
 
             app.UseCors("AllowAll");
             // Enforce Authentication configuration (jwt)

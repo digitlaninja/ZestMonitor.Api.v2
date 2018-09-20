@@ -21,8 +21,6 @@ namespace ZestMonitor.Api.Repositories
     {
         public BlockchainRepository(ZestContext context) : base(context) { }
 
-        private readonly string GetProposalsCommand = "{ \"jsonrpc\": \"1.0\", \"id\":\"getproposals\", \"m`ethod\": \"mnbudget\",\"params\":[\"show\"]}";
-
         public DateTime? GetTime(string hash)
         {
             var resultKey = this.ExecuteRPCCommand("getrawtransaction", new object[] { hash, 1 });

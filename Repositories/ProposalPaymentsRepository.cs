@@ -10,9 +10,9 @@ using ZestMonitor.Api.Helpers;
 
 namespace ZestMonitor.Api.Repositories
 {   // Deals with Manually entered Proposals payments from CMS
-    public class ManualProposalPaymentsRepository : Repository<ProposalPayments>, IManualProposalPaymentsRepository
+    public class ProposalPaymentsRepository : Repository<ProposalPayments>, IProposalPaymentsRepository
     {
-        public ManualProposalPaymentsRepository(ZestContext context) : base(context) { }
+        public ProposalPaymentsRepository(ZestContext context) : base(context) { }
 
         public async Task<PagedList<ProposalPayments>> GetPaged(PagingParams pagingParams)
         {
