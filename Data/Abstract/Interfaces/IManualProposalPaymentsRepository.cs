@@ -6,7 +6,7 @@ using ZestMonitor.Api.Helpers;
 
 namespace ZestMonitor.Api.Data.Abstract.Interfaces
 {
-    public interface IManualProposalPaymentsRepository : IRepository<ProposalPayments>
+    public interface IProposalPaymentsRepository : IRepository<ProposalPayments>
     {
         Task<PagedList<ProposalPayments>> GetPaged(PagingParams pagingParams);
         Task<ProposalPayments> Get(string hash);

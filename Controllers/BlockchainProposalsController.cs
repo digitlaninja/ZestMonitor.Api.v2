@@ -48,12 +48,5 @@ namespace ZestMonitor.Api.Controllers
 
             return Ok(result);
         }
-
-        // [HttpPost]
-        // public async Task<IActionResult> SaveProposals()
-        // {
-        //     await this.BlockchainService.SaveProposals();
-        //     return Ok();
-        // }
     }
 }

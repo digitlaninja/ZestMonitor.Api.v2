@@ -16,19 +16,19 @@ namespace ZestMonitor.Api.Controllers
 {
     [Authorize]
     [Route("api/proposalpayments")]
-    public class ManualProposalPaymentsController : ControllerBase
+    public class ProposalPaymentsController : ControllerBase
     {
-        private ManualProposalPaymentsService ManualProposalPaymentsService { get; }
+        private ProposalPaymentsService ProposalPaymentsService { get; }
 
-        public ManualProposalPaymentsController(ManualProposalPaymentsService proposalPaymentsService)
+        public ProposalPaymentsController(ProposalPaymentsService proposalPaymentsService)
         {
-            this.ManualProposalPaymentsService = proposalPaymentsService ?? throw new ArgumentNullException(nameof(proposalPaymentsService));
+            this.ProposalPaymentsService = proposalPaymentsService ?? throw new ArgumentNullException(nameof(proposalPaymentsService));
         }
 
         [HttpGet]
         public async Task<IActionResult> GetProposalPayments([FromQuery] PagingParams pagingParams)
         {
-            var result = await this.ManualProposalPaymentsService.GetPaged(pagingParams);
+            var result = await this.ProposalPaymentsService.GetPaged(pagingParams);
             if (result == null)
                 return NotFound();
 
@@ -42,7 +42,7 @@ namespace ZestMonitor.Api.Controllers
             if (string.IsNullOrEmpty(hash))
                 return BadRequest();
 
-            var result = await this.ManualProposalPaymentsService.Get(hash);
+            var result = await this.ProposalPaymentsService.Get(hash);
             if (result == null)
                 return NotFound();
 
@@ -55,7 +55,7 @@ namespace ZestMonitor.Api.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var created = await this.ManualProposalPaymentsService.Create(model);
+            var created = await this.ProposalPaymentsService.Create(model);
             if (!created)
                 return BadRequest();
 
@@ -68,7 +68,7 @@ namespace ZestMonitor.Api.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var deleted = await this.ManualProposalPaymentsService.Delete(hash);
+            var deleted = await this.ProposalPaymentsService.Delete(hash);
             if (!deleted)
                 return BadRequest();
 

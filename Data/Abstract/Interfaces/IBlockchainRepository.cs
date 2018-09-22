@@ -15,5 +15,6 @@ namespace ZestMonitor.Api.Data.Abstract.Interfaces
         BlockchainProposalJson GetProposal(string name);
         DateTime? GetTime(string hash);
         HttpWebRequest CreateRequest(string json);
+        int GetMasternodeCount();
     }
 }

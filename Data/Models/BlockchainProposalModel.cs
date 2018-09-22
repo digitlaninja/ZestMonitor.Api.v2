@@ -14,6 +14,7 @@ namespace ZestMonitor.Api.Data.Models
         public int Nays { get; set; }
         public int Abstains { get; set; }
         public double Ratio { get; internal set; }
+        public int RatioPercent { get; internal set; }
         public string IsEstablished { get; set; }
         public string IsValid { get; set; }
         public string IsValidReason { get; set; }

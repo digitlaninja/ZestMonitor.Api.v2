@@ -4,6 +4,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using ZestMonitor.Api.Data.Abstract.Interfaces;
 
 namespace ZestMonitor.Api.Repositories
@@ -63,5 +64,6 @@ namespace ZestMonitor.Api.Repositories
             return await this.Context.SaveChangesAsync() > 0;
         }
 
+        public bool AnyTracked() => this.Context.ChangeTracker.HasChanges();
     }
 }

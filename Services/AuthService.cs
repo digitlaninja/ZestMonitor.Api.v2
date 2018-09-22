@@ -32,11 +32,11 @@ namespace ZestMonitor.Api.Services
             {
                 var hashBytes = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
                 var hash = Convert.ToBase64String(hashBytes);
-                
-                if(dbPasswordHash != hash)
+
+                if (dbPasswordHash != hash)
                     return false;
 
-                    return true;
+                return true;
             }
         }
 
@@ -86,11 +86,11 @@ namespace ZestMonitor.Api.Services
 
         public async Task<User> Login(UserLoginModel user)
         {
-              if (user == null)
+            if (user == null)
                 return null;
 
             user.Username = user.Username.ToLower();
-            
+
             var dbUser = await this.UserRepository.Get(user.Username);
             if (dbUser == null)
                 return null;
@@ -112,35 +112,34 @@ namespace ZestMonitor.Api.Services
 
         public string CreateJwtAccessToken(User validUser)
         {
-                
-                var claims = new[]
-                {
+            var claims = new[]
+            {
                     new Claim(ClaimTypes.NameIdentifier, validUser.Id.ToString()),
                     new Claim(ClaimTypes.Name, validUser.Username)
                 };
 
-                // Create Key for signing
-                var secret = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(this.Config.GetSection("AppSettings:Token").Value));
+            // Create Key for signing
+            var secret = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(this.Config.GetSection("AppSettings:Token").Value));
 
-                // Credentials for signing
-                var credentials = new SigningCredentials(secret, SecurityAlgorithms.HmacSha512Signature);
+            // Credentials for signing
+            var credentials = new SigningCredentials(secret, SecurityAlgorithms.HmacSha512Signature);
 
-                // Create token descriptor or "placeholder"
-                var tokenDescriptor = new SecurityTokenDescriptor{
-                    Subject = new ClaimsIdentity(claims),
-                    Expires = DateTime.Now.AddMinutes(20),
-                    SigningCredentials = credentials
-                };
+            // Create token descriptor or "placeholder"
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = new ClaimsIdentity(claims),
+                Expires = DateTime.Now.AddMinutes(20),
+                SigningCredentials = credentials
+            };
 
-                var tokenHandler = new JwtSecurityTokenHandler();
+            var tokenHandler = new JwtSecurityTokenHandler();
 
-                // Create actual complete token from descriptor
-                var rawToken = tokenHandler.CreateToken(tokenDescriptor);
-                
-                // encode token
-                var accessToken = tokenHandler.WriteToken(rawToken);
-                return accessToken;
+            // Create actual complete token from descriptor
+            var rawToken = tokenHandler.CreateToken(tokenDescriptor);
 
+            // encode token
+            var accessToken = tokenHandler.WriteToken(rawToken);
+            return accessToken;
         }
     }
 }

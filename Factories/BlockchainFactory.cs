@@ -44,7 +44,6 @@ namespace ZestMonitor.Api.Factories
             return entity;
         }
 
-
         public static IEnumerable<BlockchainProposalModel> ToModels(this IEnumerable<BlockchainProposal> entities)
         {
             if (entities == null)
@@ -77,7 +76,8 @@ namespace ZestMonitor.Api.Factories
                 IsValid = entity.IsValid ? "Yes" : "No",
                 IsValidReason = entity.IsValidReason,
                 FValid = entity.FValid ? "Yes" : "No",
-                Ratio = entity.Ratio
+                Ratio = entity.Ratio,
+                RatioPercent = entity.RatioPercent
             };
             return model;
         }

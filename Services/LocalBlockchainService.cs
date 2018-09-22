@@ -17,24 +17,25 @@ namespace ZestMonitor.Api.Services
 {
     public class LocalBlockchainService
     {
-        private IManualProposalPaymentsRepository ManualProposalPaymentsRepository { get; }
+        private IProposalPaymentsRepository ProposalPaymentsRepository { get; }
         public ILogger<LocalBlockchainService> Logger { get; }
         public ILocalBlockchainRepository LocalBlockchainRepository { get; }
-        public ManualProposalPaymentsService ProposalPaymentsService { get; }
+        public ProposalPaymentsService ProposalPaymentsService { get; }
 
-        public LocalBlockchainService(ILogger<LocalBlockchainService> logger, IBlockchainRepository BlockchainRepository, ManualProposalPaymentsService proposalPaymentsService, ILocalBlockchainRepository localBlockchainRepository, IManualProposalPaymentsRepository manualProposalPaymentsRepository)
+        public LocalBlockchainService(ILogger<LocalBlockchainService> logger, IBlockchainRepository BlockchainRepository, ProposalPaymentsService proposalPaymentsService, ILocalBlockchainRepository localBlockchainRepository, IProposalPaymentsRepository proposalPaymentsRepository)
         {
             this.Logger = logger ?? throw new System.ArgumentNullException(nameof(logger));
             this.ProposalPaymentsService = proposalPaymentsService ?? throw new ArgumentNullException(nameof(proposalPaymentsService));
             this.LocalBlockchainRepository = localBlockchainRepository ?? throw new ArgumentNullException(nameof(localBlockchainRepository));
-            this.ManualProposalPaymentsRepository = manualProposalPaymentsRepository ?? throw new ArgumentNullException(nameof(manualProposalPaymentsRepository));
+            this.ProposalPaymentsRepository = proposalPaymentsRepository ?? throw new ArgumentNullException(nameof(proposalPaymentsRepository));
         }
 
+        #region Get
         public async Task<PagedList<BlockchainProposalModel>> GetPagedProposals(PagingParams pagingParams)
         {
             var viewModel = new List<BlockchainProposalModel>();
             var blockchainProposals = await this.LocalBlockchainRepository.GetProposals();
-            var localProposals = await this.ProposalPaymentsService.GetAll();
+            var localProposals = this.ProposalPaymentsRepository.GetAll();
 
             var result = await this.CreateBlockchainProposalPagedList(pagingParams, blockchainProposals, localProposals);
 
@@ -53,9 +54,9 @@ namespace ZestMonitor.Api.Services
             if (localProposal == null)
                 return null;
 
-            var manualProposalPayment = await this.ManualProposalPaymentsRepository.Get(localProposal.Hash);
-            if (manualProposalPayment != null)
-                localProposal.Amount = manualProposalPayment.Amount;
+            var proposalPayment = await this.ProposalPaymentsRepository.Get(localProposal.Hash);
+            if (proposalPayment != null)
+                localProposal.Amount = proposalPayment.Amount;
 
             return localProposal;
         }
@@ -65,9 +66,18 @@ namespace ZestMonitor.Api.Services
         public async Task<int> GetFundedCount() => await this.LocalBlockchainRepository.GetFundedCount();
 
         public async Task<ProposalMetadataModel> GetProposalMetadata() => await this.LocalBlockchainRepository.GetMetadata();
+        #endregion
+
+        #region Create
+        public async Task<PagedList<BlockchainProposalModel>> CreateBlockchainProposalPagedList(PagingParams pagingParams, IEnumerable<BlockchainProposal> blockchainProposals, IQueryable<ProposalPayments> localProposals)
+        {
+            var proposals = await this.CreateBlockchainProposalList(pagingParams, blockchainProposals, localProposals);
+            var pagedProposals = PagedList<BlockchainProposalModel>.Create(proposals.ToList(), pagingParams.PageNumber, pagingParams.PageSize);
+            return pagedProposals;
+        }
 
         // Constructs list of complete blockchain proposals
-        public async Task<List<BlockchainProposalModel>> CreateBlockchainProposalList(PagingParams pagingParams, IEnumerable<BlockchainProposal> blockchainProposals, IEnumerable<ProposalPayments> localProposals)
+        public async Task<List<BlockchainProposalModel>> CreateBlockchainProposalList(PagingParams pagingParams, IEnumerable<BlockchainProposal> blockchainProposals, IQueryable<ProposalPayments> localProposals)
         {
             if (pagingParams == null || blockchainProposals == null || localProposals == null)
                 return null;
@@ -83,14 +93,14 @@ namespace ZestMonitor.Api.Services
 
         // Builds a complete blockchain proposal 
         // with local, manually-entered payment amount and time (for ui)
-        private async Task<BlockchainProposalModel> ConstructBlockchainProposalModel(IEnumerable<ProposalPayments> localProposals, BlockchainProposal blockchainProposal)
+        private async Task<BlockchainProposalModel> ConstructBlockchainProposalModel(IQueryable<ProposalPayments> localProposals, BlockchainProposal blockchainProposal)
         {
             if (localProposals == null || blockchainProposal == null)
                 return null;
 
             var model = new BlockchainProposalModel();
 
-            var blockLocalProposalMatch = localProposals.OrderByDescending(x => x.CreatedAt).FirstOrDefault(x => x.Hash == blockchainProposal.Hash);
+            var blockLocalProposalMatch = await localProposals.OrderByDescending(x => x.CreatedAt).FirstOrDefaultAsync(x => x.Hash == blockchainProposal.Hash);
 
             if (blockLocalProposalMatch != null)
                 model.Amount = blockLocalProposalMatch.Amount;
@@ -110,12 +120,6 @@ namespace ZestMonitor.Api.Services
             model.FValid = blockchainProposal.FValid ? "Yes" : "No";
             return model;
         }
-
-        public async Task<PagedList<BlockchainProposalModel>> CreateBlockchainProposalPagedList(PagingParams pagingParams, IEnumerable<BlockchainProposal> blockchainProposals, IEnumerable<ProposalPayments> localProposals)
-        {
-            var proposals = await this.CreateBlockchainProposalList(pagingParams, blockchainProposals, localProposals);
-            var pagedProposals = PagedList<BlockchainProposalModel>.Create(proposals.ToList(), pagingParams.PageNumber, pagingParams.PageSize);
-            return pagedProposals;
-        }
+        #endregion
     }
 }

@@ -17,6 +17,7 @@ namespace ZestMonitor.Api.Data.Abstract.Interfaces
         void Remove(int id);
         void Remove(TEntity entity);
         void RemoveRange(IEnumerable<TEntity> entities);
+        bool AnyTracked();
         Task<bool> SaveAll();
     }
 }

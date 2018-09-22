@@ -11,9 +11,9 @@ namespace ZestMonitor.Api.Controllers
     [Route("api/[controller]")]
     public class AdminController : ControllerBase
     {
-        public ManualProposalPaymentsService ProposalPaymentsService { get; set; }
+        public ProposalPaymentsService ProposalPaymentsService { get; set; }
 
-        public AdminController(ManualProposalPaymentsService ProposalPaymentsService)
+        public AdminController(ProposalPaymentsService ProposalPaymentsService)
         {
             this.ProposalPaymentsService = ProposalPaymentsService ?? throw new ArgumentNullException(nameof(ProposalPaymentsService));
         }

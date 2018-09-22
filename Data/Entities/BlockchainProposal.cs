@@ -16,7 +16,8 @@ namespace ZestMonitor.Api.Data.Entities
         public bool IsValid { get; set; }
         public string IsValidReason { get; set; }
         public bool FValid { get; set; }
-        public double Ratio { get; internal set; }
-        public DateTime? Time { get; internal set; }
+        public double Ratio { get; set; }
+        public int RatioPercent { get; set; }
+        public DateTime? Time { get; set; }
     }
 }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -17,23 +18,50 @@ namespace ZestMonitor.Api.Services
     // Deals directly with the Blockchain
     public class BlockchainService
     {
-        private IManualProposalPaymentsRepository ManualProposalPaymentsRepository { get; }
+        private IProposalPaymentsRepository proposalPaymentsRepository { get; }
         public ILogger<BlockchainService> Logger { get; }
         public IBlockchainRepository BlockchainRepository { get; }
         public ILocalBlockchainRepository LocalBlockchainRepository { get; }
-        public ManualProposalPaymentsService ProposalPaymentsService { get; }
+        public ProposalPaymentsService ProposalPaymentsService { get; }
 
-        public BlockchainService(ILogger<BlockchainService> logger, IBlockchainRepository BlockchainRepository, ManualProposalPaymentsService proposalPaymentsService, ILocalBlockchainRepository localBlockchainRepository, IManualProposalPaymentsRepository manualProposalPaymentsRepository)
+        public BlockchainService(ILogger<BlockchainService> logger, IBlockchainRepository BlockchainRepository, ProposalPaymentsService proposalPaymentsService, ILocalBlockchainRepository localBlockchainRepository, IProposalPaymentsRepository proposalPaymentsRepository)
         {
             this.Logger = logger ?? throw new System.ArgumentNullException(nameof(logger));
             this.BlockchainRepository = BlockchainRepository ?? throw new ArgumentNullException(nameof(BlockchainRepository));
             this.ProposalPaymentsService = proposalPaymentsService ?? throw new ArgumentNullException(nameof(proposalPaymentsService));
-            this.ManualProposalPaymentsRepository = manualProposalPaymentsRepository ?? throw new ArgumentNullException(nameof(manualProposalPaymentsRepository));
+            this.proposalPaymentsRepository = proposalPaymentsRepository ?? throw new ArgumentNullException(nameof(proposalPaymentsRepository));
             this.LocalBlockchainRepository = localBlockchainRepository ?? throw new ArgumentNullException(nameof(localBlockchainRepository));
         }
 
+        public async Task SaveProposals()
+        {
+            // get block proposals -> convert to entities
+            var proposalsFromBlockchain = this.BlockchainRepository.GetProposals();
+            if (proposalsFromBlockchain.Count() <= 0 || proposalsFromBlockchain == null)
+                return;
+
+            var blockchainProposals = proposalsFromBlockchain.ToEntities();
+            var localBlockchainProposals = await this.LocalBlockchainRepository.GetProposals();
+            var proposalPayments = await this.ProposalPaymentsService.GetAll();
+            var masternodeCount = this.GetMasternodeCount();
+            foreach (var blockchainProposal in blockchainProposals)
+            {
+                var existingProposal = localBlockchainProposals.FirstOrDefault(x => x.Name == blockchainProposal.Name);
+                var newProposal = existingProposal == null;
+                if (newProposal)
+                {
+                    // Create full blockchain proposal
+                    var completeBlockchainProposal = this.ConstructFullBlockchainProposal(proposalPayments, blockchainProposal, masternodeCount);
+                    await this.LocalBlockchainRepository.Add(completeBlockchainProposal);
+                }
+            }
+
+            if (this.LocalBlockchainRepository.AnyTracked())
+                await this.LocalBlockchainRepository.SaveAll();
+        }
+
         // Builds a complete blockchain proposal with Time to store in the db
-        private BlockchainProposal ConstructFullBlockchainProposal(IEnumerable<ProposalPayments> localProposals, BlockchainProposal blockchainProposal)
+        private BlockchainProposal ConstructFullBlockchainProposal(IEnumerable<ProposalPayments> localProposals, BlockchainProposal blockchainProposal, int masternodeCount)
         {
             if (localProposals == null || blockchainProposal == null)
                 return null;
@@ -49,39 +77,20 @@ namespace ZestMonitor.Api.Services
             entity.Yeas = blockchainProposal.Yeas;
             entity.Nays = blockchainProposal.Nays;
             entity.Abstains = blockchainProposal.Abstains;
-            entity.Ratio = Math.Round(blockchainProposal.Ratio, 2);
+            entity.Ratio = blockchainProposal.Ratio;
+            entity.RatioPercent = (blockchainProposal.Yeas - blockchainProposal.Nays) / masternodeCount;
             entity.IsEstablished = blockchainProposal.IsEstablished;
             entity.IsValid = blockchainProposal.IsValid;
             entity.IsValidReason = blockchainProposal.IsValidReason;
             entity.FValid = blockchainProposal.FValid;
             return entity;
         }
-
-        public async Task SaveProposals()
+        public int GetMasternodeCount()
         {
-            // get block proposals -> convert to entities
-            var proposalsFromBlockchain = this.BlockchainRepository.GetProposals();
-            if (proposalsFromBlockchain.Count() <= 0 || proposalsFromBlockchain == null)
-                return;
-
-            var blockchainProposals = proposalsFromBlockchain.ToEntities();
-            var localBlockchainProposals = await this.LocalBlockchainRepository.GetProposals();
-            var localManualProposals = await this.ProposalPaymentsService.GetAll();
-
-            foreach (var blockchainProposal in blockchainProposals)
-            {
-                var existingProposal = localBlockchainProposals.FirstOrDefault(x => x.Name == blockchainProposal.Name);
-
-                // Add only new proposals from the blockchain
-                if (existingProposal == null)
-                {
-                    // Create full blockchain proposal
-                    var completeBlockchainProposal = this.ConstructFullBlockchainProposal(localManualProposals, blockchainProposal);
-                    await this.LocalBlockchainRepository.Add(completeBlockchainProposal);
-                }
-            }
-            await this.LocalBlockchainRepository.SaveAll();
+            return this.BlockchainRepository.GetMasternodeCount();
         }
+
+
         private static DateTime? ToTime(JObject responseJObject)
         {
             var resultKey = responseJObject.SelectToken("result");

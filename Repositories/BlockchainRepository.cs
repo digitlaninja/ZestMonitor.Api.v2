@@ -21,8 +21,6 @@ namespace ZestMonitor.Api.Repositories
     {
         public BlockchainRepository(ZestContext context) : base(context) { }
 
-        private readonly string GetProposalsCommand = "{ \"jsonrpc\": \"1.0\", \"id\":\"getproposals\", \"m`ethod\": \"mnbudget\",\"params\":[\"show\"]}";
-
         public DateTime? GetTime(string hash)
         {
             var resultKey = this.ExecuteRPCCommand("getrawtransaction", new object[] { hash, 1 });
@@ -64,12 +62,20 @@ namespace ZestMonitor.Api.Repositories
             return result;
         }
 
-        public JToken ExecuteRPCCommand(string command, params object[] parameters)
+        public int GetMasternodeCount()
+        {
+            var resultKey = this.ExecuteRPCCommand("masternode", new[] { "count" });
+            var result = resultKey.SelectToken("stable").Value<int>();
+            return result;
+        }
+
+        private JToken ExecuteRPCCommand(string command, params object[] parameters)
         {
             HttpWebRequest request = this.CreateRequest(command);
             JObject jObject = this.CreateRequestJson(command, parameters);
 
             string s = JsonConvert.SerializeObject(jObject);
+
             // serialize json for the request
             byte[] byteArray = Encoding.UTF8.GetBytes(s);
             request.ContentLength = byteArray.Length;
@@ -104,18 +110,15 @@ namespace ZestMonitor.Api.Repositories
             }
             catch (WebException webex)
             {
-
                 using (Stream str = webex.Response.GetResponseStream())
                 using (StreamReader sr = new StreamReader(str))
                 {
                     var tempRet = JsonConvert.DeserializeObject<JObject>(sr.ReadToEnd());
                     return null;
                 }
-
             }
             catch (Exception)
             {
-
                 throw;
             }
         }

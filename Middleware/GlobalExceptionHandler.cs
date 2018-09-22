@@ -24,7 +24,7 @@ namespace ZestMonitor.Api.Middleware
                 x.ForException<DbUpdateException>().ReturnStatusCode(StatusCodes.Status500InternalServerError)
                 .UsingMessageFormatter((ex, context) => JsonConvert.SerializeObject(new
                 {
-                    Message = "Sorry, we had an unexpected error, please contact the administrator."
+                    Message = "Sorry, we had an unexpected error, please contact support."
                 }));
 
                 x.ForException<ArgumentNullException>().ReturnStatusCode(StatusCodes.Status400BadRequest);

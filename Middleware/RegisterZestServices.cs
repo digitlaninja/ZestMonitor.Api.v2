@@ -20,12 +20,12 @@ namespace ZestMonitor.Api.Middleware
             services.AddSingleton<IValidator<UserLoginModel>, UserLoginValidator>();
             services.AddSingleton<IValidator<ProposalMetadataModel>, ProposalMetaDataValidator>();
 
-            services.AddScoped<ManualProposalPaymentsService>();
+            services.AddScoped<ProposalPaymentsService>();
             services.AddScoped<LocalBlockchainService>();
             services.AddScoped<BlockchainService>();
             services.AddScoped<AuthService>();
 
-            services.AddScoped<IManualProposalPaymentsRepository, ManualProposalPaymentsRepository>();
+            services.AddScoped<IProposalPaymentsRepository, ProposalPaymentsRepository>();
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<ILocalBlockchainRepository, LocalBlockchainRepository>();
             services.AddScoped<IBlockchainRepository, BlockchainRepository>();

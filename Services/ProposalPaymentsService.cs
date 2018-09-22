@@ -19,22 +19,22 @@ using ZestMonitor.Api.Helpers;
 
 namespace ZestMonitor.Api.Services
 {
-    public class ManualProposalPaymentsService
+    public class ProposalPaymentsService
     {
-        private IManualProposalPaymentsRepository ManualProposalPaymentsRepository { get; }
-        public ILogger<ManualProposalPaymentsService> Logger { get; }
+        private IProposalPaymentsRepository ProposalPaymentsRepository { get; }
+        public ILogger<ProposalPaymentsService> Logger { get; }
         public ILocalBlockchainRepository LocalBlockchainRepository { get; }
 
-        public ManualProposalPaymentsService(IManualProposalPaymentsRepository manualProposalPaymentsRepository, ILogger<ManualProposalPaymentsService> logger, ILocalBlockchainRepository localBlockchainRepository)
+        public ProposalPaymentsService(IProposalPaymentsRepository proposalPaymentsRepository, ILogger<ProposalPaymentsService> logger, ILocalBlockchainRepository localBlockchainRepository)
         {
-            this.ManualProposalPaymentsRepository = manualProposalPaymentsRepository ?? throw new ArgumentNullException(nameof(manualProposalPaymentsRepository)); ;
+            this.ProposalPaymentsRepository = proposalPaymentsRepository ?? throw new ArgumentNullException(nameof(proposalPaymentsRepository)); ;
             this.Logger = logger ?? throw new ArgumentNullException(nameof(logger));
             this.LocalBlockchainRepository = localBlockchainRepository ?? throw new ArgumentNullException(nameof(LocalBlockchainRepository));
         }
 
         public async Task<IEnumerable<ProposalPayments>> GetAll()
         {
-            var proposals = await this.ManualProposalPaymentsRepository.GetAll()?.ToListAsync();
+            var proposals = await this.ProposalPaymentsRepository.GetAll()?.ToListAsync();
             return proposals;
         }
 
@@ -43,14 +43,14 @@ namespace ZestMonitor.Api.Services
             if (pagingParams == null)
                 return null;
 
-            var proposals = await this.ManualProposalPaymentsRepository.GetPaged(pagingParams);
+            var proposals = await this.ProposalPaymentsRepository.GetPaged(pagingParams);
             var model = proposals.ToModel();
             return model;
         }
 
         public async Task<ProposalPaymentsModel> Get(string hash)
         {
-            var proposal = await this.ManualProposalPaymentsRepository.Get(hash);
+            var proposal = await this.ProposalPaymentsRepository.Get(hash);
             var model = proposal?.ToModel();
             return model;
         }
@@ -63,8 +63,8 @@ namespace ZestMonitor.Api.Services
             var entity = model.ToEntity();
             entity.CreatedAt = DateTime.Now;
 
-            await this.ManualProposalPaymentsRepository.Add(entity);
-            var result = await this.ManualProposalPaymentsRepository.SaveAll();
+            await this.ProposalPaymentsRepository.Add(entity);
+            var result = await this.ProposalPaymentsRepository.SaveAll();
             if (!result)
                 return false;
 
@@ -76,13 +76,13 @@ namespace ZestMonitor.Api.Services
             if (string.IsNullOrEmpty(hash))
                 throw new ArgumentException("message", nameof(hash));
 
-            var entities = await this.ManualProposalPaymentsRepository.GetAll()
+            var entities = await this.ProposalPaymentsRepository.GetAll()
                                                                     .Where(x => x.Hash == hash)
                                                                     .ToListAsync();
-            entities.ForEach(x => this.ManualProposalPaymentsRepository.Remove(x));
+            entities.ForEach(x => this.ProposalPaymentsRepository.Remove(x));
 
 
-            var result = await this.ManualProposalPaymentsRepository.SaveAll();
+            var result = await this.ProposalPaymentsRepository.SaveAll();
             if (!result)
                 return false;
 
