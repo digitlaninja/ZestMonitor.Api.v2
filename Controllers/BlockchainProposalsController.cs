@@ -12,9 +12,8 @@ namespace ZestMonitor.Api.Controllers
     public class BlockchainProposalsController : ControllerBase
     {
         private LocalBlockchainService LocalBlockchainService { get; }
-        private BlockchainService BlockchainService { get; }
 
-        public BlockchainProposalsController(LocalBlockchainService localBlockchainService, BlockchainService blockchainService)
+        public BlockchainProposalsController(LocalBlockchainService localBlockchainService)
         {
             this.LocalBlockchainService = localBlockchainService ?? throw new ArgumentNullException(nameof(localBlockchainService));
         }
@@ -32,7 +31,7 @@ namespace ZestMonitor.Api.Controllers
         [HttpGet("{name:proposalname}")]
         public async Task<IActionResult> GetBlockchainProposal([FromRoute]string name)
         {
-            var result = await this.LocalBlockchainService.GetLocalProposal(name);
+            var result = await this.LocalBlockchainService.GetProposal(name);
             if (result == null)
                 return BadRequest();
 

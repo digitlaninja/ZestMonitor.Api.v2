@@ -18,16 +18,17 @@ namespace ZestMonitor.Api.Services
     public class LocalBlockchainService
     {
         private IProposalPaymentsRepository ProposalPaymentsRepository { get; }
-        public ILogger<LocalBlockchainService> Logger { get; }
-        public ILocalBlockchainRepository LocalBlockchainRepository { get; }
-        public ProposalPaymentsService ProposalPaymentsService { get; }
-
-        public LocalBlockchainService(ILogger<LocalBlockchainService> logger, IBlockchainRepository BlockchainRepository, ProposalPaymentsService proposalPaymentsService, ILocalBlockchainRepository localBlockchainRepository, IProposalPaymentsRepository proposalPaymentsRepository)
+        private ILogger<LocalBlockchainService> Logger { get; }
+        private ILocalBlockchainRepository LocalBlockchainRepository { get; }
+        private ProposalPaymentsService ProposalPaymentsService { get; }
+        private IMasternodeCountRepository MasternodeCountRepository { get; }
+        public LocalBlockchainService(ILogger<LocalBlockchainService> logger, ProposalPaymentsService proposalPaymentsService, ILocalBlockchainRepository localBlockchainRepository, IProposalPaymentsRepository proposalPaymentsRepository, IMasternodeCountRepository masternodeCountRepository)
         {
-            this.Logger = logger ?? throw new System.ArgumentNullException(nameof(logger));
+            this.Logger = logger ?? throw new ArgumentNullException(nameof(logger));
             this.ProposalPaymentsService = proposalPaymentsService ?? throw new ArgumentNullException(nameof(proposalPaymentsService));
             this.LocalBlockchainRepository = localBlockchainRepository ?? throw new ArgumentNullException(nameof(localBlockchainRepository));
             this.ProposalPaymentsRepository = proposalPaymentsRepository ?? throw new ArgumentNullException(nameof(proposalPaymentsRepository));
+            this.MasternodeCountRepository = masternodeCountRepository ?? throw new ArgumentNullException(nameof(masternodeCountRepository));
         }
 
         #region Get
@@ -45,7 +46,7 @@ namespace ZestMonitor.Api.Services
             return result;
         }
 
-        public async Task<BlockchainProposalModel> GetLocalProposal(string name)
+        public async Task<BlockchainProposalModel> GetProposal(string name)
         {
             if (string.IsNullOrEmpty(name))
                 return null;
@@ -61,11 +62,44 @@ namespace ZestMonitor.Api.Services
             return localProposal;
         }
 
+        public int GetMasternodeCount()
+        {
+            var data = this.MasternodeCountRepository.GetMasternodeCountFromChain();
+            if (data == null)
+                return -1;
+
+            return data.Stable;
+        }
+
         public async Task<int> GetValidCount() => await this.LocalBlockchainRepository.GetValidCount();
 
-        public async Task<int> GetFundedCount() => await this.LocalBlockchainRepository.GetFundedCount();
+        public int GetFundedCount()
+        {
+            var masternodeCount = this.MasternodeCountRepository.GetLatestLocalMasternodeCount().Total;
+            var proposals = this.LocalBlockchainRepository.GetAll();
+            if (proposals == null)
+                return -1;
 
-        public async Task<ProposalMetadataModel> GetProposalMetadata() => await this.LocalBlockchainRepository.GetMetadata();
+            var fundedCount = 0;
+            foreach (var proposal in proposals)
+            {
+                var netVotePercent = (double)(proposal.Yeas - proposal.Nays) / (double)masternodeCount;
+                if (netVotePercent > 5)
+                    fundedCount++;
+            }
+            return fundedCount;
+        }
+
+        public async Task<ProposalMetadataModel> GetProposalMetadata()
+        {
+            var validCount = await this.GetValidCount();
+            var fundedCount = this.GetFundedCount();
+            return new ProposalMetadataModel()
+            {
+                ValidProposalCount = validCount,
+                FundedProposalCount = fundedCount
+            };
+        }
         #endregion
 
         #region Create
@@ -101,6 +135,9 @@ namespace ZestMonitor.Api.Services
             var model = new BlockchainProposalModel();
 
             var blockLocalProposalMatch = await localProposals.OrderByDescending(x => x.CreatedAt).FirstOrDefaultAsync(x => x.Hash == blockchainProposal.Hash);
+            var masternodeCount = this.MasternodeCountRepository.GetLatestLocalMasternodeCount();
+            if (masternodeCount == null)
+                return null;
 
             if (blockLocalProposalMatch != null)
                 model.Amount = blockLocalProposalMatch.Amount;
@@ -113,7 +150,7 @@ namespace ZestMonitor.Api.Services
             model.Yeas = blockchainProposal.Yeas;
             model.Nays = blockchainProposal.Nays;
             model.Abstains = blockchainProposal.Abstains;
-            model.Ratio = Math.Round(blockchainProposal.Ratio, 2);
+            model.Ratio = blockchainProposal.Ratio;
             model.IsEstablished = blockchainProposal.IsEstablished ? "Yes" : "No";
             model.IsValid = blockchainProposal.IsValid ? "Yes" : "No";
             model.IsValidReason = blockchainProposal.IsValidReason;

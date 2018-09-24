@@ -12,13 +12,13 @@ namespace ZestMonitor.Api.Data.Contexts
         public DbSet<ProposalPayments> ProposalPayments { get; set; }
         public DbSet<User> Users { get; set; }
         public DbSet<BlockchainProposal> BlockchainProposal { get; set; }
+        public DbSet<MasternodeCount> MasternodeCount { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
             builder.ApplyConfiguration(new ProposalPaymentsMap());
             builder.ApplyConfiguration(new UserMap());
-            builder.ApplyConfiguration(new BlockchainProposalMap());
+            builder.ApplyConfiguration(new MasternodeCountMap());
         }
-
     }
 }

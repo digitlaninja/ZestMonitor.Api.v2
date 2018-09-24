@@ -15,7 +15,10 @@ namespace ZestMonitor.Api.Repositories
         public LocalBlockchainRepository(ZestContext context) : base(context)
         {
         }
-        public async Task<List<BlockchainProposal>> GetProposals() => await this.GetAll()?.ToListAsync();
+        public async Task<List<BlockchainProposal>> GetProposals()
+        {
+            return await this.GetAll()?.ToListAsync();
+        }
 
         public async Task<BlockchainProposal> GetProposal(string name)
         {
@@ -46,21 +49,21 @@ namespace ZestMonitor.Api.Repositories
             return result;
         }
 
-        public async Task<ProposalMetadataModel> GetMetadata()
-        {
-            var proposals = await this.GetProposals();
-            if (proposals == null)
-                return null;
+        // public async Task<ProposalMetadataModel> GetMetadata()
+        // {
+        //     var proposals = await this.GetProposals();
+        //     if (proposals == null)
+        //         return null;
 
-            var validCount = proposals.Count(x => x.IsValid);
-            var fundedCount = proposals.Count(x => x.IsEstablished);
+        //     var validCount = proposals.Count(x => x.IsValid);
+        //     var fundedCount = proposals.Count(x => x.IsEstablished);
 
-            return new ProposalMetadataModel()
-            {
-                ValidProposalCount = validCount,
-                FundedProposalCount = fundedCount
-            };
-        }
+        //     return new ProposalMetadataModel()
+        //     {
+        //         ValidProposalCount = validCount,
+        //         FundedProposalCount = fundedCount
+        //     };
+        // }
 
     }
 }

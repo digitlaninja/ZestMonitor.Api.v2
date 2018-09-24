@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using ZestMonitor.Api.Data.Entities;
 using ZestMonitor.Api.Data.Models;
@@ -39,7 +40,28 @@ namespace ZestMonitor.Api.Factories
                 IsValid = jsonClass.IsValid,
                 IsValidReason = jsonClass.IsValidReason,
                 FValid = jsonClass.FValid,
-                Ratio = jsonClass.Ratio
+                Ratio = jsonClass.Ratio,
+                UpdatedAt = DateTime.Now
+            };
+            return entity;
+        }
+
+        public static MasternodeCount ToEntity(this MasternodeCountJson jsonClass)
+        {
+            if (jsonClass == null)
+                throw new System.ArgumentNullException(nameof(jsonClass));
+
+            var entity = new MasternodeCount()
+            {
+                Total = jsonClass.Total,
+                Stable = jsonClass.Stable,
+                ObfCompat = jsonClass.ObfCompat,
+                Enabled = jsonClass.Enabled,
+                InQueue = jsonClass.InQueue,
+                IPv4 = jsonClass.IPv4,
+                IPv6 = jsonClass.IPv6,
+                Onion = jsonClass.Onion,
+                UpdatedAt = DateTime.Now
             };
             return entity;
         }
@@ -77,9 +99,11 @@ namespace ZestMonitor.Api.Factories
                 IsValidReason = entity.IsValidReason,
                 FValid = entity.FValid ? "Yes" : "No",
                 Ratio = entity.Ratio,
-                RatioPercent = entity.RatioPercent
             };
             return model;
         }
+
+
+
     }
 }

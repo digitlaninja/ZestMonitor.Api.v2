@@ -104,8 +104,8 @@ namespace ZestMonitor.Api
                 // app.UseHsts();
             }
 
-            // RecurringJob.AddOrUpdate(() => blockchainService.SaveProposals(), "* * * * *");
-            RecurringJob.AddOrUpdate(() => blockchainService.SaveProposals(), "*/5 * * * *");
+            RecurringJob.AddOrUpdate(() => blockchainService.SaveBlockchainData(), "* * * * *");
+            // RecurringJob.AddOrUpdate(() => blockchainService.SaveProposals(), "*/1 * * * *");
 
             app.UseCors("AllowAll");
             // Enforce Authentication configuration (jwt)

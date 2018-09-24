@@ -2,22 +2,22 @@
 
 namespace ZestMonitor.Api.Migrations
 {
-    public partial class AddRatioPercentToBlockchainProposals : Migration
+    public partial class AddIsFundedToProposal : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<int>(
-                name: "RatioPercent",
-                table: "blockchainproposals",
+            migrationBuilder.AddColumn<bool>(
+                name: "IsFunded",
+                table: "BlockchainProposal",
                 nullable: false,
-                defaultValue: 0);
+                defaultValue: false);
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(
-                name: "RatioPercent",
-                table: "blockchainproposals");
+                name: "IsFunded",
+                table: "BlockchainProposal");
         }
     }
 }

@@ -62,14 +62,7 @@ namespace ZestMonitor.Api.Repositories
             return result;
         }
 
-        public int GetMasternodeCount()
-        {
-            var resultKey = this.ExecuteRPCCommand("masternode", new[] { "count" });
-            var result = resultKey.SelectToken("stable").Value<int>();
-            return result;
-        }
-
-        private JToken ExecuteRPCCommand(string command, params object[] parameters)
+        public JToken ExecuteRPCCommand(string command, params object[] parameters)
         {
             HttpWebRequest request = this.CreateRequest(command);
             JObject jObject = this.CreateRequestJson(command, parameters);
@@ -137,18 +130,6 @@ namespace ZestMonitor.Api.Repositories
             return request;
         }
 
-        private static DateTime? ToTime(JObject responseJObject)
-        {
-            var resultKey = responseJObject.SelectToken("result");
-            var timeKey = resultKey.SelectToken("time");
-            var time = JsonConvert.DeserializeObject(timeKey?.ToString());
-            var result = Convert.ToDouble(time);
-
-            DateTime dateTime = new DateTime(1970, 1, 1, 0, 0, 0, 0, System.DateTimeKind.Utc);
-            dateTime = dateTime.AddSeconds(result).ToLocalTime();
-            return dateTime;
-        }
-
         private JObject CreateRequestJson(string command, object[] parameters)
         {
             JObject jObject = new JObject();
@@ -169,6 +150,17 @@ namespace ZestMonitor.Api.Repositories
                 }
             }
             return jObject;
+        }
+        private static DateTime? ToTime(JObject responseJObject)
+        {
+            var resultKey = responseJObject.SelectToken("result");
+            var timeKey = resultKey.SelectToken("time");
+            var time = JsonConvert.DeserializeObject(timeKey?.ToString());
+            var result = Convert.ToDouble(time);
+
+            DateTime dateTime = new DateTime(1970, 1, 1, 0, 0, 0, 0, System.DateTimeKind.Utc);
+            dateTime = dateTime.AddSeconds(result).ToLocalTime();
+            return dateTime;
         }
     }
 }

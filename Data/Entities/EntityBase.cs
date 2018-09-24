@@ -11,6 +11,7 @@ namespace ZestMonitor.Api.Data.Entities
         public EntityBase()
         {
             this.UpdatedAt = DateTime.Now;
+            this.CreatedAt = DateTime.Now;
         }
     }
 }

@@ -9,8 +9,8 @@ using ZestMonitor.Api.Data.Contexts;
 namespace ZestMonitor.Api.Migrations
 {
     [DbContext(typeof(ZestContext))]
-    [Migration("20180922083320_AddRatioPercentToBlockchainProposals")]
-    partial class AddRatioPercentToBlockchainProposals
+    [Migration("20180922115429_AddMasternodeCount")]
+    partial class AddMasternodeCount
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -40,14 +40,11 @@ namespace ZestMonitor.Api.Migrations
 
                     b.Property<string>("IsValidReason");
 
-                    b.Property<string>("Name")
-                        .IsRequired();
+                    b.Property<string>("Name");
 
                     b.Property<int>("Nays");
 
                     b.Property<double>("Ratio");
-
-                    b.Property<int>("RatioPercent");
 
                     b.Property<DateTime?>("Time");
 
@@ -59,7 +56,37 @@ namespace ZestMonitor.Api.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("blockchainproposals");
+                    b.ToTable("BlockchainProposal");
+                });
+
+            modelBuilder.Entity("ZestMonitor.Api.Data.Entities.MasternodeCount", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<DateTime>("CreatedAt");
+
+                    b.Property<int>("Enabled");
+
+                    b.Property<int>("IPv4");
+
+                    b.Property<int>("IPv6");
+
+                    b.Property<int>("InQueue");
+
+                    b.Property<int>("ObfCompat");
+
+                    b.Property<int>("Onion");
+
+                    b.Property<int>("Stable");
+
+                    b.Property<int>("Total");
+
+                    b.Property<DateTime>("UpdatedAt");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("MasternodeCount");
                 });
 
             modelBuilder.Entity("ZestMonitor.Api.Data.Entities.ProposalPayments", b =>

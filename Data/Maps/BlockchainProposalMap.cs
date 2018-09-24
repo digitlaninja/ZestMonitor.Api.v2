@@ -21,6 +21,7 @@ namespace ZestMonitor.Api.Data.Maps
             builder.Property(x => x.IsValid);
             builder.Property(x => x.IsValidReason);
             builder.Property(x => x.FValid);
+            builder.Property(x => x.IsFunded);
             builder.Property(x => x.Ratio);
         }
     }
