@@ -68,7 +68,7 @@ namespace ZestMonitor.Api.Services
             if (data == null)
                 return -1;
 
-            return data.Stable;
+            return data.Total;
         }
 
         public async Task<int> GetValidCount() => await this.LocalBlockchainRepository.GetValidCount();
@@ -153,6 +153,7 @@ namespace ZestMonitor.Api.Services
             model.Ratio = blockchainProposal.Ratio;
             model.IsEstablished = blockchainProposal.IsEstablished ? "Yes" : "No";
             model.IsValid = blockchainProposal.IsValid ? "Yes" : "No";
+            model.IsFunded = blockchainProposal.IsFunded ? "Yes" : "No";
             model.IsValidReason = blockchainProposal.IsValidReason;
             model.FValid = blockchainProposal.FValid ? "Yes" : "No";
             return model;

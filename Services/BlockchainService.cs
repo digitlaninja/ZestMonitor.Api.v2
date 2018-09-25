@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -24,8 +25,9 @@ namespace ZestMonitor.Api.Services
         public ILocalBlockchainRepository LocalBlockchainRepository { get; }
         public ProposalPaymentsService ProposalPaymentsService { get; }
         public IMasternodeCountRepository MasternodeCountRepository { get; private set; }
+        public IConfiguration IConfiguration { get; }
 
-        public BlockchainService(ILogger<BlockchainService> logger, IBlockchainRepository BlockchainRepository, ProposalPaymentsService proposalPaymentsService, ILocalBlockchainRepository localBlockchainRepository, IProposalPaymentsRepository proposalPaymentsRepository, IMasternodeCountRepository masternodeCountRepository)
+        public BlockchainService(ILogger<BlockchainService> logger, IBlockchainRepository BlockchainRepository, ProposalPaymentsService proposalPaymentsService, ILocalBlockchainRepository localBlockchainRepository, IProposalPaymentsRepository proposalPaymentsRepository, IMasternodeCountRepository masternodeCountRepository, IConfiguration iConfiguration)
         {
             this.Logger = logger ?? throw new System.ArgumentNullException(nameof(logger));
             this.BlockchainRepository = BlockchainRepository ?? throw new ArgumentNullException(nameof(BlockchainRepository));
@@ -33,6 +35,7 @@ namespace ZestMonitor.Api.Services
             this.proposalPaymentsRepository = proposalPaymentsRepository ?? throw new ArgumentNullException(nameof(proposalPaymentsRepository));
             this.LocalBlockchainRepository = localBlockchainRepository ?? throw new ArgumentNullException(nameof(localBlockchainRepository));
             this.MasternodeCountRepository = masternodeCountRepository ?? throw new ArgumentNullException(nameof(masternodeCountRepository));
+            this.IConfiguration = iConfiguration ?? throw new ArgumentNullException(nameof(iConfiguration));
         }
 
         public async Task SaveBlockchainData()
@@ -108,8 +111,13 @@ namespace ZestMonitor.Api.Services
             return entity;
         }
 
-        private bool CalculateIsFunded(BlockchainProposal blockchainProposal, int masternodeCount) =>
-            (blockchainProposal.Yeas - blockchainProposal.Nays) / masternodeCount > 5 ? true : false;
+
+        // TODO: Get the "5" from config
+        private bool CalculateIsFunded(BlockchainProposal blockchainProposal, int masternodeCount)
+        {
+            var fundedThreshold = this.IConfiguration.GetValue<int>("FundedThreshold");
+            return (blockchainProposal.Yeas - blockchainProposal.Nays) / masternodeCount > fundedThreshold ? true : false;
+        }
 
         private static DateTime? ToTime(JObject responseJObject)
         {

@@ -20,6 +20,7 @@ namespace ZestMonitor.Api.Repositories
     public class MasternodeCountRepository : Repository<MasternodeCount>, IMasternodeCountRepository
     {
         private IBlockchainRepository BlockchainRepository { get; }
+
         public MasternodeCountRepository(ZestContext context, IBlockchainRepository blockchainRepository) : base(context)
         {
             this.BlockchainRepository = blockchainRepository ?? throw new ArgumentNullException(nameof(blockchainRepository));
