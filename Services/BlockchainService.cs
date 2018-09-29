@@ -124,6 +124,9 @@ namespace ZestMonitor.Api.Services
         // TODO: Get the "5" from config
         private bool CalculateIsFunded(BlockchainProposal blockchainProposal, int masternodeCount)
         {
+            if (masternodeCount <= 0)
+                return false;
+
             var fundedThreshold = this.IConfiguration.GetValue<int>("FundedThreshold");
             return (blockchainProposal.Yeas - blockchainProposal.Nays) / masternodeCount > fundedThreshold ? true : false;
         }

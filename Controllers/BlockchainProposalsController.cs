@@ -12,10 +12,12 @@ namespace ZestMonitor.Api.Controllers
     public class BlockchainProposalsController : ControllerBase
     {
         private LocalBlockchainService LocalBlockchainService { get; }
+        private BlockchainService BlockchainService { get; }
 
-        public BlockchainProposalsController(LocalBlockchainService localBlockchainService)
+        public BlockchainProposalsController(LocalBlockchainService localBlockchainService, BlockchainService blockchainService)
         {
             this.LocalBlockchainService = localBlockchainService ?? throw new ArgumentNullException(nameof(localBlockchainService));
+            this.BlockchainService = blockchainService ?? throw new ArgumentNullException(nameof(blockchainService));
         }
 
         [HttpGet]
@@ -38,6 +40,7 @@ namespace ZestMonitor.Api.Controllers
             return Ok(result);
         }
 
+
         [HttpGet("metadata")]
         public async Task<IActionResult> GetProposalMetadata()
         {
@@ -47,5 +50,12 @@ namespace ZestMonitor.Api.Controllers
 
             return Ok(result);
         }
+
+        [HttpGet("save")]
+        public async Task Save()
+        {
+            await this.BlockchainService.SaveBlockchainData();
+        }
+
     }
 }
