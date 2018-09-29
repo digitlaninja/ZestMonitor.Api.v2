@@ -41,6 +41,12 @@ namespace ZestMonitor.Api.Factories
                 IsValidReason = jsonClass.IsValidReason,
                 FValid = jsonClass.FValid,
                 Ratio = jsonClass.Ratio,
+                TotalPayment = jsonClass.TotalPayment,
+                TotalPaymentCount = jsonClass.TotalPaymentCount,
+                RemainingPaymentCount = jsonClass.RemainingPaymentCount,
+                MonthlyPayment = jsonClass.MonthlyPayment,
+                BlockStart = jsonClass.BlockStart,
+                BlockEnd = jsonClass.BlockEnd,
                 UpdatedAt = DateTime.Now
             };
             return entity;
@@ -99,6 +105,7 @@ namespace ZestMonitor.Api.Factories
                 IsValidReason = entity.IsValidReason,
                 FValid = entity.FValid ? "Yes" : "No",
                 Ratio = entity.Ratio,
+                TotalPayment = entity.TotalPayment
             };
             return model;
         }

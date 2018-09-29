@@ -14,7 +14,6 @@ using ZestMonitor.Api.Services;
 // Mainly contains logic used by the Admin project
 namespace ZestMonitor.Api.Controllers
 {
-    [Authorize]
     [Route("api/proposalpayments")]
     public class ProposalPaymentsController : ControllerBase
     {
@@ -49,6 +48,7 @@ namespace ZestMonitor.Api.Controllers
             return Ok(result);
         }
 
+        [Authorize]
         [HttpPost]
         public async Task<IActionResult> CreateProposal([FromBody] ProposalPaymentsModel model)
         {

@@ -140,7 +140,7 @@ namespace ZestMonitor.Api.Services
                 return null;
 
             if (blockLocalProposalMatch != null)
-                model.Amount = blockLocalProposalMatch.Amount;
+                model.Amount = blockchainProposal.TotalPayment == 0.0m ? blockLocalProposalMatch.Amount : Convert.ToInt32(blockchainProposal.TotalPayment) + blockLocalProposalMatch.Amount;
 
             model.Time = blockchainProposal.Time;
             model.Name = blockchainProposal.Name;
@@ -156,6 +156,7 @@ namespace ZestMonitor.Api.Services
             model.IsFunded = blockchainProposal.IsFunded ? "Yes" : "No";
             model.IsValidReason = blockchainProposal.IsValidReason;
             model.FValid = blockchainProposal.FValid ? "Yes" : "No";
+            model.TotalPayment = blockchainProposal.TotalPayment;
             return model;
         }
         #endregion

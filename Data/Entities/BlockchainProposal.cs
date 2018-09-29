@@ -19,5 +19,11 @@ namespace ZestMonitor.Api.Data.Entities
         public bool FValid { get; set; }
         public double Ratio { get; set; }
         public DateTime? Time { get; set; }
+        public decimal TotalPayment { get; set; }
+        public int TotalPaymentCount { get; set; }
+        public int RemainingPaymentCount { get; set; }
+        public decimal MonthlyPayment { get; set; }
+        public int BlockStart { get; set; }
+        public int BlockEnd { get; set; }
     }
 }

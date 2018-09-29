@@ -38,6 +38,24 @@ namespace ZestMonitor.Api.Data.Models
         public bool FValid { get; set; }
 
         [JsonProperty("ratio")]
-        public double Ratio { get; internal set; }
+        public double Ratio { get; set; }
+
+        [JsonProperty("totalPayment")]
+        public decimal TotalPayment { get; set; }
+
+        [JsonProperty("totalPaymentCount")]
+        public int TotalPaymentCount { get; set; }
+
+        [JsonProperty("remainingPaymentCount")]
+        public int RemainingPaymentCount { get; set; }
+
+        [JsonProperty("monthlyPayment")]
+        public decimal MonthlyPayment { get; set; }
+
+        [JsonProperty("blockStart")]
+        public int BlockStart { get; set; }
+
+        [JsonProperty("blockEnd")]
+        public int BlockEnd { get; set; }
     }
 }

@@ -63,11 +63,13 @@ namespace ZestMonitor.Api.Services
 
             var blockchainProposals = proposalsFromBlockchain.ToEntities();
             var localBlockchainProposals = await this.LocalBlockchainRepository.GetProposals();
-            var proposalPayments = await this.ProposalPaymentsService.GetAll();
+
             var masternodeCount = this.MasternodeCountRepository.GetLatestLocalMasternodeCount();
-            if (proposalPayments.Count() <= 0 || proposalPayments == null)
-                return;
             if (masternodeCount == null)
+                return;
+
+            var proposalPayments = await this.ProposalPaymentsService.GetAll();
+            if (proposalPayments.Count() <= 0 || proposalPayments == null)
                 return;
 
             foreach (var blockchainProposal in blockchainProposals)
@@ -108,6 +110,13 @@ namespace ZestMonitor.Api.Services
             entity.IsValidReason = blockchainProposal.IsValidReason;
             entity.IsFunded = this.CalculateIsFunded(blockchainProposal, masternodeCount);
             entity.FValid = blockchainProposal.FValid;
+            entity.TotalPayment = blockchainProposal.TotalPayment;
+            entity.TotalPaymentCount = blockchainProposal.TotalPaymentCount;
+            entity.RemainingPaymentCount = blockchainProposal.RemainingPaymentCount;
+            entity.MonthlyPayment = blockchainProposal.MonthlyPayment;
+            entity.BlockStart = blockchainProposal.BlockStart;
+            entity.BlockEnd = blockchainProposal.BlockEnd;
+            entity.UpdatedAt = DateTime.Now;
             return entity;
         }
 

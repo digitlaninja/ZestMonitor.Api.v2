@@ -23,6 +23,12 @@ namespace ZestMonitor.Api.Data.Maps
             builder.Property(x => x.FValid);
             builder.Property(x => x.IsFunded);
             builder.Property(x => x.Ratio);
+            builder.Property(x => x.TotalPayment);
+            builder.Property(x => x.TotalPaymentCount);
+            builder.Property(x => x.RemainingPaymentCount);
+            builder.Property(x => x.MonthlyPayment);
+            builder.Property(x => x.BlockStart);
+            builder.Property(x => x.BlockEnd);
         }
     }
 }
