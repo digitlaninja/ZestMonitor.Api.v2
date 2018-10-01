@@ -94,12 +94,15 @@ namespace ZestMonitor.Api.Services
         {
             var validCount = await this.GetValidCount();
             var fundedCount = this.GetFundedCount();
+            var fundedAmount = await this.ProposalPaymentsService.GetFundedAmountTotal();
             return new ProposalMetadataModel()
             {
                 ValidProposalCount = validCount,
-                FundedProposalCount = fundedCount
+                FundedProposalCount = fundedCount,
+                FundedProposalAmount = fundedAmount
             };
         }
+
         #endregion
 
         #region Create

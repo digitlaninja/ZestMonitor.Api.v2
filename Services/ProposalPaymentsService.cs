@@ -55,6 +55,19 @@ namespace ZestMonitor.Api.Services
             return model;
         }
 
+        public async Task<int> GetFundedAmountTotal()
+        {
+            var payments = this.ProposalPaymentsRepository.GetAll();
+
+            var result = 0;
+            await payments.ForEachAsync(x => result += x.Amount);
+            // foreach (var payment in payments)
+            // {
+            //     result += payment.Amount;
+            // }
+            return result;
+        }
+
         public async Task<bool> Create(ProposalPaymentsModel model)
         {
             if (model == null)
