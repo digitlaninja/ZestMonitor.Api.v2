@@ -142,7 +142,7 @@ namespace ZestMonitor.Api.Services
             if (blockLocalProposalMatch != null)
                 model.Amount = blockchainProposal.TotalPayment == 0.0m ? blockLocalProposalMatch.Amount : Convert.ToInt32(blockchainProposal.TotalPayment) + blockLocalProposalMatch.Amount;
 
-            model.Time = blockchainProposal.Time;
+            model.Time = blockchainProposal.Time.ToString();
             model.Name = blockchainProposal.Name;
             model.Url = blockchainProposal.Url;
             model.Hash = blockchainProposal.Hash;

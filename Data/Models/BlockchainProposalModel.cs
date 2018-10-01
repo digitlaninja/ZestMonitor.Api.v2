@@ -13,14 +13,14 @@ namespace ZestMonitor.Api.Data.Models
         public int Yeas { get; set; }
         public int Nays { get; set; }
         public int Abstains { get; set; }
-        public double Ratio { get; internal set; }
-        public double RatioPercent { get; internal set; }
+        public double Ratio { get; set; }
+        public double RatioPercent { get; set; }
         public string IsEstablished { get; set; }
         public string IsValid { get; set; }
         public string IsFunded { get; set; }
         public string IsValidReason { get; set; }
         public string FValid { get; set; }
         public decimal TotalPayment { get; set; }
-        public DateTime? Time { get; internal set; }
+        public string Time { get; set; }
     }
 }
