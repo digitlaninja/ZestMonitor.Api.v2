@@ -71,9 +71,9 @@ namespace ZestMonitor.Api.Services
             return data.Total;
         }
 
-        public async Task<int> GetValidCount() => await this.LocalBlockchainRepository.GetValidCount();
+        private async Task<int> GetValidCount() => await this.LocalBlockchainRepository.GetValidCount();
 
-        public int GetFundedCount()
+        private int GetFundedCount()
         {
             var masternodeCount = this.MasternodeCountRepository.GetLatestLocalMasternodeCount().Total;
             var proposals = this.LocalBlockchainRepository.GetAll();
@@ -95,12 +95,40 @@ namespace ZestMonitor.Api.Services
             var validCount = await this.GetValidCount();
             var fundedCount = this.GetFundedCount();
             var fundedAmount = await this.ProposalPaymentsService.GetFundedAmountTotal();
+
+            var deadline = await this.GetDeadline();
+
             return new ProposalMetadataModel()
             {
                 ValidProposalCount = validCount,
                 FundedProposalCount = fundedCount,
-                FundedProposalAmount = fundedAmount
+                FundedProposalAmount = fundedAmount,
+                VoteDeadline = deadline?.ToString()
             };
+        }
+
+        // private async Task<DateTime?> GetDeadline()
+        // {
+        //     var proposals = this.LocalBlockchainRepository.GetAll();
+        //     if (proposals.Count() <= 0 || proposals == null)
+        //         return null;
+
+        //     var latestProposal = await proposals.OrderByDescending(x => x.UpdatedAt).FirstOrDefaultAsync();
+        //     if (latestProposal == null)
+        //         return null;
+
+        //     // return this.MillisecondsToTime(latestProposal.BlockStart);
+        //     // this.Blo
+        //     // Time left = blockstart - getblockcount / avg blocks per day
+        //     // latestProposal.BlockStart -
+        // }
+
+        private DateTime? MillisecondsToTime(int milliseconds)
+        {
+            var ms = Convert.ToDouble(milliseconds);
+            DateTime dateTime = new DateTime(1970, 1, 1, 0, 0, 0, 0, System.DateTimeKind.Utc);
+            var result = dateTime.AddSeconds(ms);
+            return result;
         }
 
         #endregion

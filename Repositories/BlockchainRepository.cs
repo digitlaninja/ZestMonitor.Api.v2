@@ -35,6 +35,15 @@ namespace ZestMonitor.Api.Repositories
             return result;
         }
 
+        // public int GetCurrentBlock()
+        // {
+        //     var resultKey = this.ExecuteRPCCommand("getblockcount");
+        //     if (resultKey == null)
+        //         return null;
+
+        //     var timeKey = resultKey.SelectToken("time");
+        // }
+
         private DateTime? ToDateTime(JToken timeKey)
         {
             if (timeKey == null)
@@ -64,7 +73,7 @@ namespace ZestMonitor.Api.Repositories
 
         public JToken ExecuteRPCCommand(string command, params object[] parameters)
         {
-            HttpWebRequest request = this.CreateRequest(command);
+            HttpWebRequest request = this.CreatePostRequest(command);
             JObject jObject = this.CreateRequestJson(command, parameters);
 
             string s = JsonConvert.SerializeObject(jObject);
@@ -116,12 +125,45 @@ namespace ZestMonitor.Api.Repositories
             }
         }
 
-        public HttpWebRequest CreateRequest(string json)
+        public int GetCurrentBlock(string command)
+        {
+            HttpWebRequest request = this.CreatePostRequest(command);
+            WebResponse webResponse = null;
+            try
+            {
+                using (webResponse = request.GetResponse())
+                using (Stream str = webResponse.GetResponseStream())
+                using (StreamReader sr = new StreamReader(str))
+                {
+                    var responseData = sr.ReadToEnd();
+                    if (string.IsNullOrEmpty(responseData))
+                        throw new ArgumentNullException($"{nameof(responseData)} is empty.");
+
+                    var result = JsonConvert.DeserializeObject<int>(responseData);
+                    return result;
+                }
+            }
+            catch (WebException webex)
+            {
+                using (Stream str = webex.Response.GetResponseStream())
+                using (StreamReader sr = new StreamReader(str))
+                {
+                    var tempRet = JsonConvert.DeserializeObject<JObject>(sr.ReadToEnd());
+                    return -1;
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        private HttpWebRequest CreatePostRequest(string command)
         {
             HttpWebRequest request = (HttpWebRequest)WebRequest.Create("http://localhost:51473");
             request.Method = "POST";
             request.ContentType = "application/json-rpc";
-            request.ContentLength = json.Length;
+            request.ContentLength = command.Length;
             var auth = "user:pass";
 
             // encode auth for header
@@ -129,7 +171,6 @@ namespace ZestMonitor.Api.Repositories
             request.Headers.Add("Authorization", "Basic " + auth);
             return request;
         }
-
         private JObject CreateRequestJson(string command, object[] parameters)
         {
             JObject jObject = new JObject();

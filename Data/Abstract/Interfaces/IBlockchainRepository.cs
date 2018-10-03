@@ -15,7 +15,6 @@ namespace ZestMonitor.Api.Data.Abstract.Interfaces
         IEnumerable<BlockchainProposalJson> GetProposals();
         BlockchainProposalJson GetProposal(string name);
         DateTime? GetTime(string hash);
-        HttpWebRequest CreateRequest(string json);
         JToken ExecuteRPCCommand(string command, params object[] parameters);
     }
 }

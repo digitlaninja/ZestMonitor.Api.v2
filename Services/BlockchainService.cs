@@ -38,6 +38,7 @@ namespace ZestMonitor.Api.Services
             this.IConfiguration = iConfiguration ?? throw new ArgumentNullException(nameof(iConfiguration));
         }
 
+        // TODO: Create CurrentBlockData
         public async Task SaveBlockchainData()
         {
             await this.SaveMasternodeCount();
@@ -120,8 +121,6 @@ namespace ZestMonitor.Api.Services
             return entity;
         }
 
-
-        // TODO: Get the "5" from config
         private bool CalculateIsFunded(BlockchainProposal blockchainProposal, int masternodeCount)
         {
             if (masternodeCount <= 0)
@@ -129,18 +128,6 @@ namespace ZestMonitor.Api.Services
 
             var fundedThreshold = this.IConfiguration.GetValue<int>("FundedThreshold");
             return (blockchainProposal.Yeas - blockchainProposal.Nays) / masternodeCount > fundedThreshold ? true : false;
-        }
-
-        private static DateTime? ToTime(JObject responseJObject)
-        {
-            var resultKey = responseJObject.SelectToken("result");
-            var timeKey = resultKey.SelectToken("time");
-            var time = JsonConvert.DeserializeObject(timeKey?.ToString());
-            var result = Convert.ToDouble(time);
-
-            DateTime dateTime = new DateTime(1970, 1, 1, 0, 0, 0, 0, System.DateTimeKind.Utc);
-            dateTime = dateTime.AddSeconds(result).ToLocalTime();
-            return dateTime;
         }
     }
 }
