@@ -35,14 +35,12 @@ namespace ZestMonitor.Api.Repositories
             return result;
         }
 
-        // public int GetCurrentBlock()
-        // {
-        //     var resultKey = this.ExecuteRPCCommand("getblockcount");
-        //     if (resultKey == null)
-        //         return null;
+        public int GetCurrentBlockCount()
+        {
+            var result = this.ExecuteRPCCommand("getblockcount");
 
-        //     var timeKey = resultKey.SelectToken("time");
-        // }
+            var timeKey = resultKey.SelectToken("time");
+        }
 
         private DateTime? ToDateTime(JToken timeKey)
         {
@@ -171,6 +169,7 @@ namespace ZestMonitor.Api.Repositories
             request.Headers.Add("Authorization", "Basic " + auth);
             return request;
         }
+
         private JObject CreateRequestJson(string command, object[] parameters)
         {
             JObject jObject = new JObject();
@@ -178,18 +177,18 @@ namespace ZestMonitor.Api.Repositories
             jObject["id"] = "1";
             jObject["method"] = command;
 
-            if (parameters != null)
+            if (parameters == null)
+                return jObject;
+
+            if (parameters.Length <= 0)
+                return jObject;
+
+            JArray props = new JArray();
+            foreach (var p in parameters)
             {
-                if (parameters.Length > 0)
-                {
-                    JArray props = new JArray();
-                    foreach (var p in parameters)
-                    {
-                        props.Add(p);
-                    }
-                    jObject.Add(new JProperty("params", props));
-                }
+                props.Add(p);
             }
+            jObject.Add(new JProperty("params", props));
             return jObject;
         }
     }
