@@ -17,6 +17,8 @@ namespace ZestMonitor.Api.Data.Maps
             builder.Property(x => x.IPv4);
             builder.Property(x => x.IPv6);
             builder.Property(x => x.Onion);
+            builder.Property(x => x.CreatedAt);
+            builder.Property(x => x.UpdatedAt);
         }
     }
 }

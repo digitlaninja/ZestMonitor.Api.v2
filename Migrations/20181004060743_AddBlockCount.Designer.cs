@@ -2,15 +2,17 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ZestMonitor.Api.Data.Contexts;
 
 namespace ZestMonitor.Api.Migrations
 {
     [DbContext(typeof(ZestContext))]
-    partial class ZestContextModelSnapshot : ModelSnapshot
+    [Migration("20181004060743_AddBlockCount")]
+    partial class AddBlockCount
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -68,7 +70,7 @@ namespace ZestMonitor.Api.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("BlockchainProposals");
+                    b.ToTable("BlockchainProposal");
                 });
 
             modelBuilder.Entity("ZestMonitor.Api.Data.Entities.BlockCount", b =>
@@ -118,7 +120,7 @@ namespace ZestMonitor.Api.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("MasternodeCounts");
+                    b.ToTable("MasternodeCount");
                 });
 
             modelBuilder.Entity("ZestMonitor.Api.Data.Entities.ProposalPayments", b =>

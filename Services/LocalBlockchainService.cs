@@ -96,14 +96,14 @@ namespace ZestMonitor.Api.Services
             var fundedCount = this.GetFundedCount();
             var fundedAmount = await this.ProposalPaymentsService.GetFundedAmountTotal();
 
-            var deadline = await this.GetDeadline();
+            // var deadline = await this.GetDeadline();
 
             return new ProposalMetadataModel()
             {
                 ValidProposalCount = validCount,
                 FundedProposalCount = fundedCount,
                 FundedProposalAmount = fundedAmount,
-                VoteDeadline = deadline?.ToString()
+                // VoteDeadline = deadline?.ToString()
             };
         }
 
@@ -118,9 +118,9 @@ namespace ZestMonitor.Api.Services
         //         return null;
 
         //     // return this.MillisecondsToTime(latestProposal.BlockStart);
-        //     // this.Blo
-        //     // Time left = blockstart - getblockcount / avg blocks per day
-        //     // latestProposal.BlockStart -
+
+        //     // Deadline = blockstart - getblockcount / avg blocks per day
+        //     latestProposal.BlockStart -
         // }
 
         private DateTime? MillisecondsToTime(int milliseconds)
