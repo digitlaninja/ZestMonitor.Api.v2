@@ -28,6 +28,8 @@ namespace ZestMonitor.Api.Data.Maps
             builder.Property(x => x.MonthlyPayment);
             builder.Property(x => x.BlockStart);
             builder.Property(x => x.BlockEnd);
+            builder.Property(x => x.CreatedAt);
+            builder.Property(x => x.UpdatedAt);
         }
     }
 }

@@ -14,11 +14,10 @@ using ZestMonitor.Api.Data.Entities;
 using ZestMonitor.Api.Data.Models;
 using ZestMonitor.Api.Factories;
 using ZestMonitor.Api.Helpers;
-using ZestMonitor.Api.Data.Abstract.Interfaces;
 
 namespace ZestMonitor.Api.Repositories
 {
-    public class BlockCountRepository : Repository<MasternodeCount>, IBlockCountRepository
+    public class BlockCountRepository : Repository<BlockCount>, IBlockCountRepository
     {
         private IBlockchainRepository BlockchainRepository { get; }
 
@@ -30,7 +29,7 @@ namespace ZestMonitor.Api.Repositories
         {
         }
 
-        public MasternodeCountJson GetMasternodeCountFromChain()
+        public MasternodeCountJson GetBlockCountFromChain()
         {
             var resultKey = this.BlockchainRepository.ExecuteRPCCommand("masternode", new[] { "count" });
             var result = JsonConvert.DeserializeObject<MasternodeCountJson>(resultKey?.ToString());
@@ -45,16 +44,20 @@ namespace ZestMonitor.Api.Repositories
             return false;
         }
 
-        public async Task AddMasternodeCount()
-        {
-            var data = this.GetMasternodeCountFromChain();
-            await this.Add(data.ToEntity());
-        }
+        // public async Task AddMasternodeCount()
+        // {
+        //     var count = this.GetBlockCountFromChain();
+        //     var entity = new BlockCount()
+        //     {
+        //         Count = count
+        //     };
+        //     await this.Add(entity);
+        // }
 
-        public MasternodeCount GetLatestLocalMasternodeCount()
-        {
-            var counts = this.GetAll();
-            return counts.OrderByDescending(x => x.CreatedAt).FirstOrDefault();
-        }
+        // public MasternodeCount GetLatestLocalMasternodeCount()
+        // {
+        //     var counts = this.GetAll();
+        //     return counts.OrderByDescending(x => x.CreatedAt).FirstOrDefault();
+        // }
     }
 }

@@ -9,7 +9,7 @@ using ZestMonitor.Api.Data.Contexts;
 namespace ZestMonitor.Api.Migrations
 {
     [DbContext(typeof(ZestContext))]
-    [Migration("20181004061301_PluraliseTableNames")]
+    [Migration("20181006064756_PluraliseTableNames")]
     partial class PluraliseTableNames
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -71,26 +71,6 @@ namespace ZestMonitor.Api.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("BlockchainProposals");
-                });
-
-            modelBuilder.Entity("ZestMonitor.Api.Data.Entities.BlockCount", b =>
-                {
-                    b.Property<DateTime>("UpdatedAt");
-
-                    b.Property<string>("Count");
-
-                    b.Property<DateTime>("CreatedAt");
-
-                    b.Property<int>("Id");
-
-                    b.HasKey("UpdatedAt");
-
-                    b.HasAlternateKey("CreatedAt");
-
-
-                    b.HasAlternateKey("Id");
-
-                    b.ToTable("BlockCounts");
                 });
 
             modelBuilder.Entity("ZestMonitor.Api.Data.Entities.MasternodeCount", b =>

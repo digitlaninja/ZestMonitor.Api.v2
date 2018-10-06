@@ -9,8 +9,9 @@ namespace ZestMonitor.Api.Data.Maps
         public void Configure(EntityTypeBuilder<BlockCount> builder)
         {
             builder.HasKey(x => x.Id);
-            builder.HasKey(x => x.CreatedAt);
-            builder.HasKey(x => x.UpdatedAt);
+            builder.Property(x => x.Count);
+            builder.Property(x => x.CreatedAt);
+            builder.Property(x => x.UpdatedAt);
         }
     }
 }

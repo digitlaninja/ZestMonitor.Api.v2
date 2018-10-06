@@ -71,26 +71,6 @@ namespace ZestMonitor.Api.Migrations
                     b.ToTable("BlockchainProposals");
                 });
 
-            modelBuilder.Entity("ZestMonitor.Api.Data.Entities.BlockCount", b =>
-                {
-                    b.Property<DateTime>("UpdatedAt");
-
-                    b.Property<string>("Count");
-
-                    b.Property<DateTime>("CreatedAt");
-
-                    b.Property<int>("Id");
-
-                    b.HasKey("UpdatedAt");
-
-                    b.HasAlternateKey("CreatedAt");
-
-
-                    b.HasAlternateKey("Id");
-
-                    b.ToTable("BlockCounts");
-                });
-
             modelBuilder.Entity("ZestMonitor.Api.Data.Entities.MasternodeCount", b =>
                 {
                     b.Property<int>("Id")

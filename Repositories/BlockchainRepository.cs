@@ -38,8 +38,7 @@ namespace ZestMonitor.Api.Repositories
         public int GetCurrentBlockCount()
         {
             var result = this.ExecuteRPCCommand("getblockcount");
-
-            var timeKey = resultKey.SelectToken("time");
+            return 1;
         }
 
         private DateTime? ToDateTime(JToken timeKey)
