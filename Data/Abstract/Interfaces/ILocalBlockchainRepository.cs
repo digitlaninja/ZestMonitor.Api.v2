@@ -9,9 +9,8 @@ namespace ZestMonitor.Api.Data.Abstract.Interfaces
     {
         Task<List<BlockchainProposal>> GetProposals();
         Task<BlockchainProposal> GetProposal(string name);
-        // Task<ProposalMetadataModel> GetMetadata();
+        Task<BlockchainProposal> GetLatest();
         Task<int> GetValidCount();
         Task<int> GetFundedCount();
-
     }
 }

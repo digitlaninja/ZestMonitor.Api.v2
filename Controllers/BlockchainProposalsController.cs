@@ -40,7 +40,6 @@ namespace ZestMonitor.Api.Controllers
             return Ok(result);
         }
 
-
         [HttpGet("metadata")]
         public async Task<IActionResult> GetProposalMetadata()
         {

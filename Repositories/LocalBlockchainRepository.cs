@@ -49,6 +49,15 @@ namespace ZestMonitor.Api.Repositories
             return result;
         }
 
+        public async Task<BlockchainProposal> GetLatest()
+        {
+            var proposals = this.GetAll();
+            if (proposals == null)
+                return null;
+
+            return await proposals.OrderByDescending(x => x.CreatedAt).FirstOrDefaultAsync();
+        }
+
         // public async Task<ProposalMetadataModel> GetMetadata()
         // {
         //     var proposals = await this.GetProposals();

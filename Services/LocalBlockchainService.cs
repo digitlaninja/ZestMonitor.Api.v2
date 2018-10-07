@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -12,6 +13,7 @@ using ZestMonitor.Api.Data.Entities;
 using ZestMonitor.Api.Data.Models;
 using ZestMonitor.Api.Factories;
 using ZestMonitor.Api.Helpers;
+using ZestMonitor.Api.Repositories;
 
 namespace ZestMonitor.Api.Services
 {
@@ -22,13 +24,17 @@ namespace ZestMonitor.Api.Services
         private ILocalBlockchainRepository LocalBlockchainRepository { get; }
         private ProposalPaymentsService ProposalPaymentsService { get; }
         private IMasternodeCountRepository MasternodeCountRepository { get; }
-        public LocalBlockchainService(ILogger<LocalBlockchainService> logger, ProposalPaymentsService proposalPaymentsService, ILocalBlockchainRepository localBlockchainRepository, IProposalPaymentsRepository proposalPaymentsRepository, IMasternodeCountRepository masternodeCountRepository)
+        private IBlockCountRepository BlockCountRepository { get; }
+        public IConfiguration IConfiguration { get; }
+        public LocalBlockchainService(ILogger<LocalBlockchainService> logger, ProposalPaymentsService proposalPaymentsService, ILocalBlockchainRepository localBlockchainRepository, IProposalPaymentsRepository proposalPaymentsRepository, IMasternodeCountRepository masternodeCountRepository, IBlockCountRepository blockCountRepository, IConfiguration iConfiguration)
         {
             this.Logger = logger ?? throw new ArgumentNullException(nameof(logger));
             this.ProposalPaymentsService = proposalPaymentsService ?? throw new ArgumentNullException(nameof(proposalPaymentsService));
             this.LocalBlockchainRepository = localBlockchainRepository ?? throw new ArgumentNullException(nameof(localBlockchainRepository));
             this.ProposalPaymentsRepository = proposalPaymentsRepository ?? throw new ArgumentNullException(nameof(proposalPaymentsRepository));
             this.MasternodeCountRepository = masternodeCountRepository ?? throw new ArgumentNullException(nameof(masternodeCountRepository));
+            this.BlockCountRepository = blockCountRepository ?? throw new ArgumentNullException(nameof(blockCountRepository));
+            this.IConfiguration = iConfiguration ?? throw new ArgumentNullException(nameof(iConfiguration));
         }
 
         #region Get
@@ -73,9 +79,9 @@ namespace ZestMonitor.Api.Services
 
         private async Task<int> GetValidCount() => await this.LocalBlockchainRepository.GetValidCount();
 
-        private int GetFundedCount()
+        private async Task<int> GetFundedCount()
         {
-            var masternodeCount = this.MasternodeCountRepository.GetLatestLocalMasternodeCount().Total;
+            var masternodeCount = (await this.MasternodeCountRepository.GetLatestLocalMasternodeCount()).Total;
             var proposals = this.LocalBlockchainRepository.GetAll();
             if (proposals == null)
                 return -1;
@@ -93,7 +99,7 @@ namespace ZestMonitor.Api.Services
         public async Task<ProposalMetadataModel> GetProposalMetadata()
         {
             var validCount = await this.GetValidCount();
-            var fundedCount = this.GetFundedCount();
+            var fundedCount = await this.GetFundedCount();
             var fundedAmount = await this.ProposalPaymentsService.GetFundedAmountTotal();
 
             // var deadline = await this.GetDeadline();
@@ -107,21 +113,21 @@ namespace ZestMonitor.Api.Services
             };
         }
 
-        // private async Task<DateTime?> GetDeadline()
-        // {
-        //     var proposals = this.LocalBlockchainRepository.GetAll();
-        //     if (proposals.Count() <= 0 || proposals == null)
-        //         return null;
+        private async Task<DateTime?> GetDeadline()
+        {
+            var latestProposal = await this.LocalBlockchainRepository.GetLatest();
+            if (latestProposal == null)
+                return null;
 
-        //     var latestProposal = await proposals.OrderByDescending(x => x.UpdatedAt).FirstOrDefaultAsync();
-        //     if (latestProposal == null)
-        //         return null;
+            var latestBlockCount = await this.BlockCountRepository.GetLatestLocalBlockCount();
+            if (latestBlockCount == null)
+                return null;
 
-        //     // return this.MillisecondsToTime(latestProposal.BlockStart);
-
-        //     // Deadline = blockstart - getblockcount / avg blocks per day
-        //     latestProposal.BlockStart -
-        // }
+            // Deadline = blockstart - getblockcount / avg blocks per day
+            var deadline = latestProposal.BlockStart - latestBlockCount.Count / this.IConfiguration.GetValue<int>("FundedThreshold");
+            var result = this.MillisecondsToTime(deadline);
+            return result;
+        }
 
         private DateTime? MillisecondsToTime(int milliseconds)
         {
@@ -166,7 +172,7 @@ namespace ZestMonitor.Api.Services
             var model = new BlockchainProposalModel();
 
             var blockLocalProposalMatch = await localProposals.OrderByDescending(x => x.CreatedAt).FirstOrDefaultAsync(x => x.Hash == blockchainProposal.Hash);
-            var masternodeCount = this.MasternodeCountRepository.GetLatestLocalMasternodeCount();
+            var masternodeCount = await this.MasternodeCountRepository.GetLatestLocalMasternodeCount();
             if (masternodeCount == null)
                 return null;
 

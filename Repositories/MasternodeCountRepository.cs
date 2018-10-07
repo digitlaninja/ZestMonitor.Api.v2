@@ -50,10 +50,10 @@ namespace ZestMonitor.Api.Repositories
             await this.Add(data.ToEntity());
         }
 
-        public MasternodeCount GetLatestLocalMasternodeCount()
+        public async Task<MasternodeCount> GetLatestLocalMasternodeCount()
         {
             var counts = this.GetAll();
-            return counts.OrderByDescending(x => x.CreatedAt).FirstOrDefault();
+            return await counts.OrderByDescending(x => x.CreatedAt).FirstOrDefaultAsync();
         }
     }
 }

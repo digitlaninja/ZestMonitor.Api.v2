@@ -8,7 +8,7 @@ namespace ZestMonitor.Api.Data.Abstract.Interfaces
     {
         Task AddMasternodeCount();
         MasternodeCountJson GetMasternodeCountFromChain();
-        MasternodeCount GetLatestLocalMasternodeCount();
+        Task<MasternodeCount> GetLatestLocalMasternodeCount();
         Task<bool> UpdatedToday();
     }
 }
