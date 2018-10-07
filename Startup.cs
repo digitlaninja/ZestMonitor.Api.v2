@@ -83,8 +83,8 @@ namespace ZestMonitor.Api
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, Seed seed, ILoggerFactory loggerFactory, BlockchainService blockchainService)
         {
             app.UseCustomExceptionHandler(this._logger);
-            app.UseHangfireServer();
-            app.UseHangfireDashboard();
+            // app.UseHangfireServer();
+            // app.UseHangfireDashboard();
 
             app.Map("/error", x => x.Run(y => throw new Exception()));
             loggerFactory.AddProvider(new ConsoleLoggerProvider((category, logLevel) => logLevel >= LogLevel.Critical, false));
@@ -105,7 +105,7 @@ namespace ZestMonitor.Api
             }
 
             // RecurringJob.AddOrUpdate(() => blockchainService.SaveBlockchainData(), "* * * * *");
-            RecurringJob.AddOrUpdate(() => blockchainService.SaveBlockchainData(), "*/5 * * * *");
+            // RecurringJob.AddOrUpdate(() => blockchainService.SaveBlockchainData(), "*/5 * * * *");
 
             app.UseCors("AllowAll");
             // Enforce Authentication configuration (jwt)

@@ -6,7 +6,6 @@ namespace ZestMonitor.Api.Repositories
 {
     public interface IBlockCountRepository : IRepository<BlockCount>
     {
-        int GetBlockCountFromChain();
         Task<bool> UpdatedToday();
         Task AddBlockCount();
         Task<BlockCount> GetLatestLocalBlockCount();

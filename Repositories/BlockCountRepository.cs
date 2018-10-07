@@ -26,24 +26,17 @@ namespace ZestMonitor.Api.Repositories
             this.BlockchainRepository = blockchainRepository ?? throw new ArgumentNullException(nameof(blockchainRepository));
         }
 
-        public int GetBlockCountFromChain()
-        {
-            var resultKey = this.BlockchainRepository.ExecuteRPCCommand("masternode", new[] { "count" });
-            var result = JsonConvert.DeserializeObject<int>(resultKey?.ToString());
-            return result;
-        }
-
         public async Task<bool> UpdatedToday()
         {
-            var updatedToday = await this.FindBy(x => x.CreatedAt.Day == DateTime.Today.Day);
-            if (updatedToday.Count() > 0)
-                return true;
+            // var updatedToday = await this.FindBy(x => x.CreatedAt.Day == DateTime.Today.Day);
+            // if (updatedToday.Count() > 0)
+            //     return true;
             return false;
         }
 
         public async Task AddBlockCount()
         {
-            var count = this.GetBlockCountFromChain();
+            var count = this.BlockchainRepository.GetCurrentBlockCount();
             var entity = new BlockCount()
             {
                 Count = count

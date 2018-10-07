@@ -37,8 +37,9 @@ namespace ZestMonitor.Api.Repositories
 
         public int GetCurrentBlockCount()
         {
-            var result = this.ExecuteRPCCommand("getblockcount");
-            return 1;
+            var result = this.GetCurrentBlock();
+            var currentBlockCount = result.First.Value<int>();
+            return currentBlockCount;
         }
 
         private DateTime? ToDateTime(JToken timeKey)
@@ -122,9 +123,30 @@ namespace ZestMonitor.Api.Repositories
             }
         }
 
-        public int GetCurrentBlock(string command)
+        public JToken GetCurrentBlock()
         {
+            var command = "getblockcount";
             HttpWebRequest request = this.CreatePostRequest(command);
+            JObject jObject = this.CreateRequestJson(command, null);
+
+            string s = JsonConvert.SerializeObject(jObject);
+
+            // serialize json for the request
+            byte[] byteArray = Encoding.UTF8.GetBytes(s);
+            request.ContentLength = byteArray.Length;
+
+            try
+            {
+                using (Stream dataStream = request.GetRequestStream())
+                {
+                    dataStream.Write(byteArray, 0, byteArray.Length);
+                }
+            }
+            catch (WebException we)
+            {
+                return -1;
+            }
+
             WebResponse webResponse = null;
             try
             {
@@ -136,8 +158,9 @@ namespace ZestMonitor.Api.Repositories
                     if (string.IsNullOrEmpty(responseData))
                         throw new ArgumentNullException($"{nameof(responseData)} is empty.");
 
-                    var result = JsonConvert.DeserializeObject<int>(responseData);
-                    return result;
+                    var responseJObject = JsonConvert.DeserializeObject<JObject>(responseData);
+                    var resultKey = responseJObject.First;
+                    return resultKey;
                 }
             }
             catch (WebException webex)
@@ -146,7 +169,7 @@ namespace ZestMonitor.Api.Repositories
                 using (StreamReader sr = new StreamReader(str))
                 {
                     var tempRet = JsonConvert.DeserializeObject<JObject>(sr.ReadToEnd());
-                    return -1;
+                    return null;
                 }
             }
             catch (Exception)

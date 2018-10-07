@@ -16,5 +16,6 @@ namespace ZestMonitor.Api.Data.Abstract.Interfaces
         BlockchainProposalJson GetProposal(string name);
         DateTime? GetTime(string hash);
         JToken ExecuteRPCCommand(string command, params object[] parameters);
+        int GetCurrentBlockCount();
     }
 }
