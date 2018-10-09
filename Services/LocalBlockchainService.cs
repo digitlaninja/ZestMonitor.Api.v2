@@ -102,18 +102,37 @@ namespace ZestMonitor.Api.Services
             var fundedCount = await this.GetFundedCount();
             var fundedAmount = await this.ProposalPaymentsService.GetFundedAmountTotal();
 
-            // var deadline = await this.GetDeadline();
+            var daysLeft = await this.GetDaysLeft();
+            var deadline = this.GetDeadline(daysLeft);
 
             return new ProposalMetadataModel()
             {
                 ValidProposalCount = validCount,
                 FundedProposalCount = fundedCount,
                 FundedProposalAmount = fundedAmount,
-                // VoteDeadline = deadline?.ToString()
+                DaysLeft = (daysLeft == null || daysLeft <= 0) ? null : daysLeft,
+                VoteDeadline = deadline?.ToString()
             };
         }
 
-        private async Task<DateTime?> GetDeadline()
+        private DateTime? GetDeadline(double? daysLeft)
+        {
+            if (daysLeft <= 0 || daysLeft == null)
+                return null;
+
+            try
+            {
+                var dt = DateTime.Now;
+                return dt.AddDays((double)daysLeft);
+            }
+            catch (Exception ex)
+            {
+                Logger.LogCritical(ex.Message);
+                return null;
+            }
+        }
+
+        private async Task<double?> GetDaysLeft()
         {
             var latestProposal = await this.LocalBlockchainRepository.GetLatest();
             if (latestProposal == null)
@@ -123,10 +142,9 @@ namespace ZestMonitor.Api.Services
             if (latestBlockCount == null)
                 return null;
 
-            // Deadline = blockstart - getblockcount / avg blocks per day
-            var deadline = latestProposal.BlockStart - latestBlockCount.Count / this.IConfiguration.GetValue<int>("FundedThreshold");
-            var result = this.MillisecondsToTime(deadline);
-            return result;
+            var averageBlocksPerDay = this.IConfiguration.GetValue<int>("AvgBlocksPerDay");
+            var result = ((double)latestProposal.BlockStart - (double)latestBlockCount.Count) / (double)averageBlocksPerDay;
+            return Math.Round(result, 2);
         }
 
         private DateTime? MillisecondsToTime(int milliseconds)
