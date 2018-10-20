@@ -9,6 +9,6 @@ namespace ZestMonitor.Api.Data.Abstract.Interfaces
     public interface IProposalPaymentsRepository : IRepository<ProposalPayments>
     {
         Task<PagedList<ProposalPayments>> GetPaged(PagingParams pagingParams);
-        Task<ProposalPayments> Get(string hash);
+        Task<ProposalPayments> GetLatest(string hash);
     }
 }

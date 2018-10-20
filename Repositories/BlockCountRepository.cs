@@ -28,9 +28,9 @@ namespace ZestMonitor.Api.Repositories
 
         public async Task<bool> UpdatedToday()
         {
-            // var updatedToday = await this.FindBy(x => x.CreatedAt.Day == DateTime.Today.Day);
-            // if (updatedToday.Count() > 0)
-            //     return true;
+            var updatedToday = await this.FindBy(x => x.CreatedAt.Day == DateTime.Today.Day);
+            if (updatedToday.Count() > 0)
+                return true;
             return false;
         }
 

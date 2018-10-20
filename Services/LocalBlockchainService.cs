@@ -61,13 +61,12 @@ namespace ZestMonitor.Api.Services
             if (localProposal == null)
                 return null;
 
-            var proposalPayment = await this.ProposalPaymentsRepository.Get(localProposal.Hash);
+            var proposalPayment = await this.ProposalPaymentsRepository.GetLatest(localProposal.Hash);
             if (proposalPayment != null)
                 localProposal.Amount = proposalPayment.Amount;
 
             return localProposal;
         }
-
         public int GetMasternodeCount()
         {
             var data = this.MasternodeCountRepository.GetMasternodeCountFromChain();

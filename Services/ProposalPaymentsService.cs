@@ -50,7 +50,7 @@ namespace ZestMonitor.Api.Services
 
         public async Task<ProposalPaymentsModel> Get(string hash)
         {
-            var proposal = await this.ProposalPaymentsRepository.Get(hash);
+            var proposal = await this.ProposalPaymentsRepository.GetLatest(hash);
             var model = proposal?.ToModel();
             return model;
         }
@@ -79,16 +79,14 @@ namespace ZestMonitor.Api.Services
             return true;
         }
 
-        public async Task<bool> Delete(string hash)
+        public async Task<bool> Delete(int id)
         {
-            if (string.IsNullOrEmpty(hash))
-                throw new ArgumentException("message", nameof(hash));
+            if (id <= 0)
+                throw new ArgumentException("message", nameof(id));
 
-            var entities = await this.ProposalPaymentsRepository.GetAll()
-                                                                    .Where(x => x.Hash == hash)
-                                                                    .ToListAsync();
-            entities.ForEach(x => this.ProposalPaymentsRepository.Remove(x));
-
+            var entity = await this.ProposalPaymentsRepository.GetAll().FirstOrDefaultAsync(x => x.Id == id);
+            // entities.ForEach(x => this.ProposalPaymentsRepository.Remove(x));
+            this.ProposalPaymentsRepository.Remove(entity);
 
             var result = await this.ProposalPaymentsRepository.SaveAll();
             if (!result)

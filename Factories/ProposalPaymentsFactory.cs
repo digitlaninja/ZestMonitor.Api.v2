@@ -12,6 +12,7 @@ public static class ProposalPaymentsFactory
 
         return new ProposalPaymentsModel()
         {
+            Id = entity.Id,
             Hash = entity.Hash,
             ShortDescription = entity.ShortDescription,
             Amount = entity.Amount,
@@ -37,6 +38,7 @@ public static class ProposalPaymentsFactory
     {
         if (entities == null)
             throw new System.ArgumentNullException(nameof(entities));
+
         List<ProposalPaymentsModel> model = new List<ProposalPaymentsModel>();
         foreach (var entity in entities)
         {
@@ -71,6 +73,7 @@ public static class ProposalPaymentsFactory
 
         return new ProposalPayments()
         {
+            Id = model.Id,
             Hash = model.Hash,
             ShortDescription = model.ShortDescription,
             Amount = model.Amount,

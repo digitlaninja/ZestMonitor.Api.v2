@@ -9,7 +9,8 @@ using ZestMonitor.Api.Data.Models;
 using ZestMonitor.Api.Helpers;
 
 namespace ZestMonitor.Api.Repositories
-{   // Deals with Manually entered Proposals payments from CMS
+{
+    // Deals with Manually entered Proposals payments from CMS
     public class ProposalPaymentsRepository : Repository<ProposalPayments>, IProposalPaymentsRepository
     {
         public ProposalPaymentsRepository(ZestContext context) : base(context) { }
@@ -27,10 +28,10 @@ namespace ZestMonitor.Api.Repositories
             return await PagedList<ProposalPayments>.CreateAsync(entities, pagingParams.PageNumber, pagingParams.PageSize);
         }
 
-        public async Task<ProposalPayments> Get(string hash)
+        public async Task<ProposalPayments> GetLatest(string hash)
         {
             var query = this.GetAll();
-            var entity = await query.FirstOrDefaultAsync(x => x.Hash == hash);
+            var entity = await query.OrderByDescending(x => x.CreatedAt).FirstOrDefaultAsync(x => x.Hash == hash);
             return entity;
         }
 

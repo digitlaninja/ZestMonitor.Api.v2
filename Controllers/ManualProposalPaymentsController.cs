@@ -62,13 +62,14 @@ namespace ZestMonitor.Api.Controllers
             return StatusCode(201, model);
         }
 
-        [HttpDelete("{hash}")]
-        public async Task<IActionResult> DeleteProposal([FromRoute] string hash)
+        [Authorize]
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteProposal([FromRoute] int id)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var deleted = await this.ProposalPaymentsService.Delete(hash);
+            var deleted = await this.ProposalPaymentsService.Delete(id);
             if (!deleted)
                 return BadRequest();
 

@@ -6,6 +6,7 @@ namespace ZestMonitor.Api.Data.Models
     [Validator(typeof(ProposalPaymentsValidator))]
     public class ProposalPaymentsModel
     {
+        public int Id { get; set; }
         public string Hash { get; set; }
         public string ShortDescription { get; set; }
         public int Amount { get; set; }
