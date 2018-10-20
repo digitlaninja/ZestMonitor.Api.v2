@@ -50,11 +50,11 @@ namespace ZestMonitor.Api.Controllers
             return Ok(result);
         }
 
-        [HttpGet("save")]
-        public async Task Save()
-        {
-            await this.BlockchainService.SaveBlockchainData();
-        }
+        // [HttpGet("save")]
+        // public async Task Save()
+        // {
+        //     await this.BlockchainService.SaveBlockchainData();
+        // }
 
     }
 }
