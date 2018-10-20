@@ -109,6 +109,8 @@ namespace ZestMonitor.Api
             app.UseCors("AllowAll");
 
             // Enforce Authentication configuration (jwt)
+            app.UseDefaultFiles();
+            app.UseStaticFiles();
             app.UseAuthentication();
             // app.UseHttpsRedirection();
             app.UseMvc();

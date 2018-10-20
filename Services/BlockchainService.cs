@@ -25,16 +25,11 @@ namespace ZestMonitor.Api.Services
         public IBlockchainRepository BlockchainRepository { get; }
         public ILocalBlockchainRepository LocalBlockchainRepository { get; }
         public ProposalPaymentsService ProposalPaymentsService { get; }
-<<<<<<< HEAD
         public IMasternodeCountRepository MasternodeCountRepository { get; private set; }
         public IBlockCountRepository BlockCountRepository { get; set; }
         public IConfiguration IConfiguration { get; }
 
         public BlockchainService(ILogger<BlockchainService> logger, IBlockchainRepository BlockchainRepository, ProposalPaymentsService proposalPaymentsService, ILocalBlockchainRepository localBlockchainRepository, IProposalPaymentsRepository proposalPaymentsRepository, IMasternodeCountRepository masternodeCountRepository, IBlockCountRepository blockCountRepository, IConfiguration iConfiguration)
-=======
-
-        public BlockchainService(ILogger<BlockchainService> logger, IBlockchainRepository BlockchainRepository, ProposalPaymentsService proposalPaymentsService, ILocalBlockchainRepository localBlockchainRepository, IProposalPaymentsRepository proposalPaymentsRepository)
->>>>>>> ca51337467703614e14a7bcfd5446c0baeeb50c7
         {
             this.Logger = logger ?? throw new System.ArgumentNullException(nameof(logger));
             this.BlockchainRepository = BlockchainRepository ?? throw new ArgumentNullException(nameof(BlockchainRepository));
@@ -72,7 +67,6 @@ namespace ZestMonitor.Api.Services
 
             var blockchainProposals = proposalsFromBlockchain.ToEntities();
             var localBlockchainProposals = await this.LocalBlockchainRepository.GetProposals();
-<<<<<<< HEAD
 
             var masternodeCount = await this.MasternodeCountRepository.GetLatestLocalMasternodeCount();
             if (masternodeCount == null)
@@ -81,9 +75,6 @@ namespace ZestMonitor.Api.Services
             var proposalPayments = await this.ProposalPaymentsService.GetAll();
             if (proposalPayments.Count() <= 0 || proposalPayments == null)
                 return;
-=======
-            var proposalPayments = await this.ProposalPaymentsService.GetAll();
->>>>>>> ca51337467703614e14a7bcfd5446c0baeeb50c7
 
             foreach (var blockchainProposal in blockchainProposals)
             {
@@ -92,11 +83,7 @@ namespace ZestMonitor.Api.Services
                 if (newProposal)
                 {
                     // Create full blockchain proposal
-<<<<<<< HEAD
                     var completeBlockchainProposal = this.ConstructFullBlockchainProposal(proposalPayments, blockchainProposal, masternodeCount.Total);
-=======
-                    var completeBlockchainProposal = this.ConstructFullBlockchainProposal(proposalPayments, blockchainProposal);
->>>>>>> ca51337467703614e14a7bcfd5446c0baeeb50c7
                     await this.LocalBlockchainRepository.Add(completeBlockchainProposal);
                 }
             }
